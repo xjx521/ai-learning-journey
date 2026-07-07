@@ -599,7 +599,7 @@ print(f"函数外: x = {x}")
 ```
 
 **问题**：两次输出有什么不同？为什么？（写在注释里）
-
+第一个函数内是20函数外是10，第二个函数内外都是20因为通过global声明了是全局变量
 ---
 
 #### 题目 2：lambda 表达式 ⭐⭐
@@ -629,7 +629,48 @@ is_positive(-3) = False
 偶数的平方：[4, 16, 36]  （输入为 [1,2,3,4,5,6]）
 ```
 
----
+### 题目4：json⭐⭐
+
+ 要求写一个程序,完成 4 件事:
+
+  1. 准备数据(一个列表,里面是字典)
+  students = [
+      {"name": "小明", "score": 92},
+      {"name": "小红", "score": 76},
+      {"name": "小刚", "score": 58},
+      {"name": "小美", "score": 85},
+  ]
+
+  2. 存档:用 json.dump 把 students 存到文件 students.json
+
+  3. 读档:用 json.load 从 students.json 读回来,存到变量 loaded
+
+  4. 筛选:用 filter + lambda 从 loaded 里筛出成绩 ≥ 80 的学生,打印他们的名字
+
+  期望输出(顺序无所谓):
+  优秀学生：小明 小美
+
+  两个小提示(先自己想,卡住了再回来看)
+
+  <details>
+
+  提示 1:存中文到 JSON 时,默认会被转成 \uXXXX 这种乱码。要加参数让中文正常显示:
+  json.dump(students, f, ensure_ascii=False, indent=2)
+  indent=2 是让文件里的 JSON 带缩进,好看(可选)。
+
+  提示 2:第 4 步筛出来的是字典,取名字用 x["name"]。filter 返回的是对象,记得 list() 转一下才能遍历。
+
+  </details>
+
+  额外挑战(可选)
+
+  读完文件后,不改原数据,直接在内存里给每个学生加一个等级字段:
+  - score ≥ 80 → "A"
+  - 60 ≤ score < 80 → "B"
+  - score < 60 → "C"
+
+  提示:用 map + lambda 可能不好写(因为有 if-elif),这题用普通 for 循环或列表推导式更顺手——这也是为啥我之前说"lambda
+  不是万能的,复杂逻辑用 def 更清楚"。
 
 ### Day 10：异常处理
 
