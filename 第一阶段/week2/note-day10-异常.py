@@ -186,3 +186,11 @@ AssertionError
 2
 3
 到这里来
+
+
+
+
+  #1函数没 return 就返回 None —— 以后调试"为什么打印出来是 None"第一反应就查这个。
+  #2. except 要接对异常类型 —— 10/'a' 是 TypeError 不是 ValueError，类型不匹配就漏出去崩溃。
+  #3. 自定义异常 = 继承 Exception + 自己 if/raise —— 类体只声明类型，检查逻辑你自己写。
+  #4. finally 一定执行，但变量可能还没赋值 —— 用 f = None + if f: 兜底，或直接用 with。
