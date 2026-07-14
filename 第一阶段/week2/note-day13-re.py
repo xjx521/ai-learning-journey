@@ -90,14 +90,20 @@ print(result)  # 密码是 ***，别告诉别人
 从 "我今年25岁，有3个朋友，存了10000元" 中提取所有数字，返回 ['25', '3', '10000']
 提示：re.findall(r'??', text)
 """
-
-
+# text='我今年25岁，有3个朋友，存了10000元'
+# print(re.findall(r'\d+',text))
 """
 练习 2：验证纯字母字符串
 判断一个字符串是否只包含英文字母（可以大小写），不能有空格、数字、符号
 提示：用 re.fullmatch(r'??', text)
 """
-
+# text='afbvafaetuqhfvzbaglkagAGAGBAZJF'
+# result=re.fullmatch(r'^[a-zA-Z]+$',text)
+# print(result.group())
+# if result:
+#     print('是纯字母')
+# else:
+#     print('不是纯字母')
 
 """
 练习 3：提取网址中的域名
@@ -105,28 +111,39 @@ print(result)  # 密码是 ***，别告诉别人
 提示：域名在 https:// 后面，/ 之前，可以用 r'https://??/??'
 提示：[^/]+ 表示一个或多个非斜杠字符
 """
-
-
+# text = "访问 https://www.baidu.com 搜索"
+# result = re.search(r'https://([^\s/]+)', text)
+# if result:
+#     print(result.group(1))#如果是全部https://www.baidu.com就是result.group()
 """
 练习 4：验证密码强度（可选，较难）
 密码规则：6-16位，必须包含至少一个字母和一个数字，可以包含下划线
 思路：先检查长度，再用 search 分别找字母和数字
 """
-
+# password=input('输入密码：（至少一个字母和数字，可以包含下划线）')
+# if 6<=len(password)<=16 and re.search(r'\d+',password) and re.search(r'[a-zA-Z]+',password):
+#     print('合法')
+# else:
+#     print('不合法')
 
 """
 练习 5：替换敏感信息
 把 "张三的手机号是13812345678，李四的手机号是15987654321" 中的手机号替换为 '***'
 提示：re.sub(r'??', '***', text)
 """
-
-
+# text="张三的手机号是13812345678，李四的手机号是15987654321"
+# result=re.sub(r'\d+','***',text)
+# print(result)
 """
 练习 6：提取 URL 的协议和域名（可选，较难）
 从 "https://github.com/xjxx" 中分别提取协议（https）和域名（github.com）
 提示：用 search 匹配，再用 .group() 提取
 """
-
+# text="https://github.com/xjxx"
+# result=re.search(r'(\w+)://([^/]+)',text)
+# if result:
+#     print(result.group(1))
+#     print(result.group(2))
 
 # 答案区（做完再看！）
 """
@@ -145,7 +162,7 @@ print(result)  # 密码是 ***，别告诉别人
 
 练习 3 答案：
   text = "访问 https://www.baidu.com 搜索"
-  result = re.search(r'https://([^/]+)', text)
+  result = re.search(r'https://([^\s/]+)', text)
   # ([^/]+) 表示捕获一个或多个非斜杠字符
   if result:
       print(result.group(1))  # www.baidu.com
