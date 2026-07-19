@@ -18,15 +18,16 @@ import json
 请分析以下 URL 的各部分：
 https://api.github.com:443/repos/octocat/Hello-World/issues?state=open&sort=created#comments
 
-1. 协议（Scheme）：_____________
-2. 域名（Host）：_____________
-3. 端口（Port）：_____________
-4. 路径（Path）：_____________
-5. 查询参数（Query String）：_____________
-6. 片段标识符（Fragment）：_____________
+1. 协议（Scheme）：_____https://___
+2. 域名（Host）：___api.github.com__________
+3. 端口（Port）：_______:443______
+4. 路径（Path）：____repos/octocat/Hello-World/issues_________
+5. 查询参数（Query String）：____?state=open&sort=created_________
+6. 片段标识符（Fragment）：_____#comments________
 
 请写出你的答案后再运行本文件对照答案。
 """
+
 
 # 练习 1 的答案
 def check_exercise_1():
@@ -52,13 +53,14 @@ def check_exercise_1():
 """
 场景：你在开发一个博客系统的 API，请为以下操作选择最合适的 HTTP 方法：
 
-1. 用户查看文章列表 → _____
-2. 用户发布新文章 → _____
-3. 用户修改某篇文章的全部内容 → _____
-4. 用户删除某篇文章 → _____
-5. 用户只修改文章的标题（其他不变）→ _____
-6. 用户搜索文章（带关键词参数）→ _____
+1. 用户查看文章列表 → _GET____
+2. 用户发布新文章 → _POST____
+3. 用户修改某篇文章的全部内容 → _PUT____
+4. 用户删除某篇文章 → ___DELETE__
+5. 用户只修改文章的标题（其他不变）→ _PATCH____
+6. 用户搜索文章（带关键词参数）→ _GET(参数放在查询字符串中)____
 """
+
 
 def check_exercise_2():
     answers = {
@@ -83,17 +85,18 @@ def check_exercise_2():
 """
 请为以下场景选择最合适的 HTTP 状态码：
 
-1. 用户注册成功，账户已创建 → _____
-2. 用户尝试登录，但密码错误 → _____
-3. 用户访问一个不存在的页面 → _____
-4. 用户未登录就访问需要登录的页面 → _____
-5. 用户已登录但试图访问管理员专属页面 → _____
-6. 服务器数据库连接失败，无法处理请求 → _____
-7. 用户重复提交表单被限流 → _____
-8. 请求成功，数据正常返回 → _____
-9. 删除资源成功，不需要返回内容 → _____
-10. 客户端发送的 JSON 格式不对 → _____
+1. 用户注册成功，账户已创建 → _201____
+2. 用户尝试登录，但密码错误 → _401____
+3. 用户访问一个不存在的页面 → _404____
+4. 用户未登录就访问需要登录的页面 → _401____
+5. 用户已登录但试图访问管理员专属页面 → _403____
+6. 服务器数据库连接失败，无法处理请求 → _500____
+7. 用户重复提交表单被限流 → _429____
+8. 请求成功，数据正常返回 → ___200__
+9. 删除资源成功，不需要返回内容 → __204___
+10. 客户端发送的 JSON 格式不对 → _400____
 """
+
 
 def check_exercise_3():
     answers = {
@@ -131,14 +134,16 @@ def exercise_4_get_request():
     # TODO 1：向 https://httpbin.org/get 发送 GET 请求
     # 带上查询参数：name=你的英文名, day=22
     # 提示：用 params 参数传字典
-    url = "https://httpbin.org/get"
+    url = "https://postman-echo.com/get"
     params = {
-        "name": "YourName",  # ← 改成你的英文名
+        "name": "xjx",  # ← 改成你的英文名
         "day": 22,
     }
 
     try:
-        response = requests.get(url, params=params, timeout=10)
+        response = requests.get(
+            url, params=params, timeout=10
+        )  # GET 没有 Body，数据只能放 URL
 
         # 打印关键信息
         print(f"请求 URL：{response.url}")
@@ -148,7 +153,9 @@ def exercise_4_get_request():
         # 解析 JSON 响应
         data = response.json()
         print(f"服务器收到的参数：{data.get('args')}")
-        print(f"你的 User-Agent：{data.get('headers', {}).get('User-Agent', 'N/A')[:50]}...")
+        print(
+            f"你的 User-Agent：{data.get('headers', {}).get('User-Agent', 'N/A')[:50]}..."
+        )
         print("✅ GET 请求成功！\n")
 
     except requests.exceptions.RequestException as e:
@@ -169,11 +176,11 @@ def exercise_5_post_request():
     # TODO 2：向 https://httpbin.org/post 发送 POST 请求
     # 用 JSON 格式发送以下数据：
     # {"username": "你的名字", "age": 你的年龄, "email": "你的邮箱"}
-    url = "https://httpbin.org/post"
+    url = "https://postman-echo.com/post"
     payload = {
-        "username": "zhangsan",  # ← 改成你的信息
+        "username": "xjx",  # ← 改成你的信息
         "age": 21,
-        "email": "zhangsan@example.com",
+        "email": "2936132290@qq.com",
     }
 
     try:
@@ -216,9 +223,10 @@ def exercise_6_headers():
     #   - X-Custom-Header: 你学号的后四位
     #   - Authorization: Bearer my-fake-token-123
     url = "https://httpbin.org/headers"
+    EXPECTED_CUSTOM_HEADER = "0602"
     headers = {
         "Accept": "application/json",
-        "X-Custom-Header": "0000",  # ← 改成你学号后四位
+        "X-Custom-Header": "9999",  # ← 故意写错
         "Authorization": "Bearer my-fake-token-123",
     }
 
@@ -233,6 +241,9 @@ def exercise_6_headers():
             expected = headers[key]
             status = "✅" if actual == expected else "❌"
             print(f"  {status} {key}: {actual}")
+            print(
+                f"  {status} X-Custom-Header: 期望 {EXPECTED_CUSTOM_HEADER}, 实际 {actual}"
+            )
 
         print()
 
@@ -315,7 +326,9 @@ def exercise_8_crud_simulation():
             "userId": 1,
             "id": post_id,
         }
-        response = requests.put(f"{base_url}/posts/{post_id}", json=updated_post, timeout=10)
+        response = requests.put(
+            f"{base_url}/posts/{post_id}", json=updated_post, timeout=10
+        )
         print(f"   状态码：{response.status_code}（期望 200）")
         print(f"   返回数据：{json.dumps(response.json(), ensure_ascii=False)}")
 
@@ -342,20 +355,20 @@ def exercise_8_crud_simulation():
 """
 请思考以下问题，先自己写答案，再运行本文件查看参考答案：
 
-1. 为什么 GET 请求的参数放在 URL 里，而 POST 放在 Body 里？
-   这样设计有什么好处和限制？
+1. 为什么 GET 请求的参数放在 URL 里，而 POST 放在 Body 里？get在url里 可被缓存或者分享 适合查询 限制：长度有限制 而且不安全
+   这样设计有什么好处和限制？post放在body无长度限制 不会被缓存 适合提交操作
 
 2. 如果一个 API 接口既可以接受 GET 也可以接受 POST，
-   你会怎么选择？有什么判断标准？
+   你会怎么选择？有什么判断标准？看操作是否幂等（多次请求结果要求一样》GET）参数是否敏感（敏感》POST）参数量大不大（大的话》POST）是否需要缓存（需要》GET）
 
 3. HTTP 是"无状态"的，但我们在网站上登录后却能保持登录状态。
-   这是怎么做到的？你知道几种方案？
+   这是怎么做到的？你知道几种方案？我知道两种方案 一种是cookie+session 服务器存session保存用户信息 浏览器存cookie保存session_id 一种是 JWT token 服务器生成加密token 客户端存在localStoraage 每次请求带上Authorzation:Bearer<token>
 
 4. 401 Unauthorized 和 403 Forbidden 有什么区别？
-   请举一个生活中的例子来类比。
+   请举一个生活中的例子来类比。401是没登录 403是登录了但是没有权限访问 比如你要参加某高档会议 401是没票进入或者票已经过期了 403是能进入但是会议里的跟高级那台酒桌去不了
 
-5. 为什么刷新页面时，浏览器会警告"确认重新提交表单"？
-   这和 HTTP 方法的哪个特性有关？
+5. 为什么刷新页面时，浏览器会警告"确认重新提交表单"？因为post非幂等因为怕你重复多次提交表单
+   这和 HTTP 方法的哪个特性有关？get有幂等性 刷新重新获取数据
 """
 
 
@@ -369,7 +382,7 @@ def check_exercise_9():
             "1. GET vs POST 参数位置",
             "GET 参数在 URL 中 → 可被缓存/收藏/分享，适合'查询'操作。\n"
             "   限制：URL 长度有限（~2048字符），且不安全（密码不应放URL）。\n"
-            "   POST 参数在 Body 中 → 无长度限制，不会被缓存，适合'提交'操作。"
+            "   POST 参数在 Body 中 → 无长度限制，不会被缓存，适合'提交'操作。",
         ),
         (
             "2. GET 还是 POST？",
@@ -377,14 +390,14 @@ def check_exercise_9():
             "   - 操作是否幂等？（多次执行结果一样 → GET）\n"
             "   - 参数是否敏感？（密码/个人信息 → POST）\n"
             "   - 参数量是否大？（超过 URL 限制 → POST）\n"
-            "   - 是否需要缓存？（搜索结果可缓存 → GET）"
+            "   - 是否需要缓存？（搜索结果可缓存 → GET）",
         ),
         (
             "3. 无状态的解决方案",
             "方案一：Cookie + Session → 服务器存 Session，客户端存 Cookie 中的 session_id\n"
             "   方案二：JWT Token → 服务器生成加密 Token，客户端存在 localStorage，\n"
             "   每次请求带上 Authorization: Bearer <token>\n"
-            "   方案三：URL 重写 → 把 session_id 拼在 URL 里（不推荐，不安全）"
+            "   方案三：URL 重写 → 把 session_id 拼在 URL 里（不推荐，不安全）",
         ),
         (
             "4. 401 vs 403",
@@ -392,13 +405,13 @@ def check_exercise_9():
             "   403 = '我知道你是谁，但你不行' → 已认证但无权限\n"
             "   生活例子：\n"
             "   401 = 你没有门禁卡，保安不让你进\n"
-            "   403 = 你有门禁卡，但你的卡只能进大厅，进不了 VIP 室"
+            "   403 = 你有门禁卡，但你的卡只能进大厅，进不了 VIP 室",
         ),
         (
             "5. 刷新表单警告",
             "因为 POST 请求不是幂等的。浏览器警告你：\n"
             "   '刷新会重新发送 POST 请求，可能导致重复提交（重复下单/重复付款）'\n"
-            "   GET 请求刷新不会有这个警告，因为 GET 是幂等的，刷新只是重新获取数据。"
+            "   GET 请求刷新不会有这个警告，因为 GET 是幂等的，刷新只是重新获取数据。",
         ),
     ]
     for title, answer in answers:
@@ -453,3 +466,31 @@ if __name__ == "__main__":
     print("🎉 所有练习运行完毕！")
     print("📌 别忘了做今天的 LeetCode 推荐题！")
     print("=" * 50)
+
+
+#  # 实验 1：把 GET 改成 POST，会怎样？
+#   response = requests.post(url, params=params, timeout=10)
+#   # 观察：URL 还有参数吗？
+
+#   # 实验 2：把 URL 改成不存在的地址
+#   url = "https://httpbin.org/notfound"
+#   # 观察：状态码变成了什么？
+
+#   # 实验 3：在练习 5 里多加一个字段
+#   payload = {
+#       "username": "xjx",
+#       "age": 21,
+#       "email": "2936132290@qq.com",
+#       "hobbies": ["编程", "游戏"],   # ← 加个列表
+#       "is_student": True,             # ← 加个布尔值
+#   }
+#   # 观察：服务器能正确接收嵌套数据吗？
+
+#   # 实验 4：在练习 6 里故意写错请求头的值
+#   headers = {
+#       "X-Custom-Header": "9999",  # ← 改成和实际不符的值
+#   }
+#   # 观察：验证逻辑怎么工作的？
+
+#   # 实验 5：把练习 7 的 allow_redirects=False 改成 True
+#   # 观察：301 重定向后最终到了哪里？
