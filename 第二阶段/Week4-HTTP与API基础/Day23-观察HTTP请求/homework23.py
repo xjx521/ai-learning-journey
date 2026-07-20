@@ -14,7 +14,6 @@ import threading
 import time
 import json
 
-
 # ============================================================
 # 【练习 1】F12 观察任务（浏览器操作，无需写代码）
 # ============================================================
@@ -29,32 +28,32 @@ import json
 4. 观察出现的请求：
 
    问题 1.1：请求的 URL 是什么？
-   你的答案：_____________
+   你的答案：__https://api.bilibili.com/x/web-interface/suggest?highlight=0&term=FastAPI&spmid=333.337&web_location=333.337___________
 
    问题 1.2：请求方法是什么？（GET 还是 POST？）
-   你的答案：_____________
+   你的答案：___GET__________
 
    问题 1.3：在请求参数中找到你的搜索关键词了吗？参数名叫什么？
-   你的答案：_____________
+   你的答案：_____参数名：term________
 
    问题 1.4：响应体是什么格式？（JSON / HTML / 纯文本？）
-   你的答案：_____________
+   你的答案：__application/json___________
 
 任务 2：观察请求头
 --------------------------
-1. 打开 https://httpbin.org/headers
+1. 打开 https://postman-echo.com/headers
 2. F12 → Network → 刷新页面
 3. 点击第一个请求（httpbin.org/headers）
 4. 查看 Headers 标签：
 
    问题 2.1：你的浏览器 User-Agent 是什么？（复制前 50 个字符）
-   你的答案：_____________
+   你的答案：__Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36___________
 
    问题 2.2：Accept 请求头的值是什么？
-   你的答案：_____________
+   你的答案：______*/*_______
 
    问题 2.3：响应体的 Content-Type 是什么？
-   你的答案：_____________
+   你的答案：_____application/json________
 
 任务 3：观察 Cookie
 --------------------------
@@ -63,13 +62,14 @@ import json
 3. 查看 Request Headers 中有没有 Cookie？
 
    问题 3.1：未登录时，请求头中有 Cookie 吗？
-   你的答案：_____________
+   你的答案：_____有访客cookie________
 
 4. 如果你已有 GitHub 账号，登录后再观察一次：
 
    问题 3.2：登录后，请求头中多了哪些 Cookie？（写出一两个名字即可）
-   你的答案：_____________
+   你的答案：____fid=2457; _uid=301186067; _d=1784558536577; UID=301186067;_________
 """
+
 
 # ==================== 参考答案 ====================
 def check_exercise_1():
@@ -103,6 +103,7 @@ def check_exercise_1():
 运行后，你的电脑就变成了一个 HTTP 服务器！
 """
 
+
 class SimpleHandler(BaseHTTPRequestHandler):
     """
     这是一个最简单的 HTTP 请求处理器。
@@ -111,31 +112,39 @@ class SimpleHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """处理 GET 请求"""
-        # 1. 设置响应状态码
-        self.send_response(200)
+        # # 1. 设置响应状态码#bug 发送了状态码200到第二不end_header()已经结束了不会再接收新的状态码
+        # self.send_response(200)
 
-        # 2. 设置响应头
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.end_headers()
+        # # 2. 设置响应头#bug
+        # self.send_header("Content-Type", "text/html; charset=utf-8")
+        # self.end_headers()
 
         # 3. 根据路径返回不同内容
         if self.path == "/":
+            status = 200
             html = "<h1>欢迎来到我的第一个服务器！🎉</h1><p>这是首页。</p>"
         elif self.path == "/about":
+            status = 200
             html = "<h1>关于页面</h1><p>这是我 Day 23 的练习作品。</p>"
         elif self.path.startswith("/hello/"):
+            status = 200
             # 从路径中提取名字：/hello/张三 → 张三
-            name = self.path.replace("/hello/", "")
+            name = self.path.replace("/hello/", "谢均宪")
             html = f"<h1>你好，{name}！</h1>"
         else:
-            self.send_response(404)
+            status = 404
             self.end_headers()
             html = "<h1>404 - 页面不存在</h1>"
             # 注意：这里有个 bug！404 时 send_response 被调用了两次
             # 你能修复它吗？
 
+        self.send_response(status)
+        self.send_header("Content-Type", "text/html;charset=utf-8")
+        self.end_headers()
+
         # 4. 写入响应体（必须是 bytes）
         self.wfile.write(html.encode("utf-8"))
+        return
 
     def do_POST(self):
         """处理 POST 请求"""
@@ -146,7 +155,11 @@ class SimpleHandler(BaseHTTPRequestHandler):
         # 尝试解析 JSON
         try:
             data = json.loads(body)
-            response = {"status": "success", "received": data, "message": "服务器收到了你的数据！"}
+            response = {
+                "status": "success",
+                "received": data,
+                "message": "服务器收到了你的数据！",
+            }
             status = 200
         except json.JSONDecodeError:
             response = {"status": "error", "message": "请发送有效的 JSON 格式"}
@@ -187,10 +200,12 @@ def exercise_2_start_server():
     print("请在浏览器中访问以下 URL：")
     print("  1. http://localhost:8888/")
     print("  2. http://localhost:8888/about")
-    print("  3. http://localhost:8888/hello/你的名字")
+    print("  3. http://localhost:8888/hello/谢均宪")
     print("  4. http://localhost:8888/notfound")
     print("\n用 curl 或 Postman 发送 POST 请求：")
-    print('  curl -X POST http://localhost:8888 -H "Content-Type: application/json" -d \'{"name":"test"}\'')
+    print(
+        '  curl -X POST http://localhost:8888 -H "Content-Type: application/json" -d \'{"name":"test"}\''
+    )
     print("\n按 Ctrl+C 停止服务器\n")
     print("-" * 50)
 
@@ -307,16 +322,16 @@ def exercise_3_requests_experiments():
     curl https://httpbin.org/get
 
     问题：响应中 "origin" 字段的值是什么？
-    你的答案：_____________（这是你的公网 IP 地址）
+    你的答案：_14.112.34.20_____（这是你的公网 IP 地址）
 
 命令 2：带参数的 GET
     curl "https://httpbin.org/get?name=test&course=http"
 
     问题：在响应的 "args" 中看到了什么？
-    你的答案：_____________
+    你的答案：__{"course":"http","name":"test"}___________
 
 命令 3：发送 POST 请求
-    curl -X POST https://httpbin.org/post -H "Content-Type: application/json" -d "{\"message\":\"hello\"}"
+    curl -X POST  http://127.0.0.1:8888 -H "Content-Type: application/json" -d "{\"message\":\"hello\"}"
 
     ⚠️ Windows cmd 中引号处理不同，建议用 Git Bash 或 PowerShell
     PowerShell 版本：
@@ -329,14 +344,15 @@ def exercise_3_requests_experiments():
     curl -v https://httpbin.org/get
 
     问题：以 > 开头的行是什么？以 < 开头的行是什么？
-    你的答案：_____________
+    你的答案：__>GET HOST User-Agent Accept请求 <响应___________
 
 命令 5：下载文件
     curl -o test.json https://httpbin.org/json
 
     问题：当前目录下是否多了一个 test.json 文件？打开看看内容。
-    你的答案：_____________
+    你的答案：___内容是 httpbin 返回的示例 JSON__________
 """
+
 
 # ==================== 参考答案 ====================
 def check_exercise_4():
@@ -365,7 +381,7 @@ def check_exercise_4():
 任务 1：发送 GET 请求
     URL: https://jsonplaceholder.typicode.com/users
     问题：返回了多少个用户？第一个用户的名字是什么？
-    你的答案：_____________
+    你的答案：___10个用户_ 名字是Bert_________
 
 任务 2：发送 POST 请求
     URL: https://jsonplaceholder.typicode.com/posts
@@ -376,7 +392,7 @@ def check_exercise_4():
         "userId": 1
     }
     问题：返回的状态码是多少？返回的 id 是多少？
-    你的答案：_____________
+    你的答案：_____201__id是101______
 
 任务 3：创建一个 Collection
     把任务 1 和任务 2 的请求保存到同一个 Collection 中，
@@ -395,6 +411,7 @@ def check_exercise_4():
 
     💡 环境变量在切换开发/测试/生产环境时非常有用。
 """
+
 
 # ==================== 参考答案 ====================
 def check_exercise_5():

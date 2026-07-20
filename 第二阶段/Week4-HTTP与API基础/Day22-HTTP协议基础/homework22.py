@@ -494,3 +494,11 @@ if __name__ == "__main__":
 
 #   # 实验 5：把练习 7 的 allow_redirects=False 改成 True
 #   # 观察：301 重定向后最终到了哪里？
+#  修改后（allow_redirects=True）：
+#   [200] 重定向（注意：requests 会自动跟随）
+#   为什么变成了 200？因为发生了一个"自动跳转"的过程：
+#   1. requests 请求 /status/301
+#   2. 服务器回复：301，请去新地址 https://httpbin.org/redirect/1
+#   3. requests 自动帮你请求新地址
+#   4. 新地址正常返回数据（200 OK）
+#   5. requests 把最终的 200 报告给你
