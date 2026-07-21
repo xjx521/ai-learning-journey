@@ -7,7 +7,6 @@ Day 24 练习题：RESTful API 设计 + JSON
 
 import json
 
-
 # ============================================================
 # 【练习 1】RESTful API 设计（核心练习）
 # ============================================================
@@ -22,35 +21,36 @@ import json
 请按同样的格式完成以下设计：
 
 1. 查看所有书籍列表
-   你的设计：____________________________________
+   你的设计：___GET /books -> 200_________________________________
 
 2. 查看某一本书的详细信息（通过 ID）
-   你的设计：____________________________________
+   你的设计：_______GET /books/{books_id}___->200__________________________
 
 3. 添加一本新书到书店
-   你的设计：____________________________________
+   你的设计：_________POST___/books ->__201______________________
 
 4. 更新某本书的全部信息（标题、价格、描述等全改）
-   你的设计：____________________________________
+   你的设计：_________PUT /books/{books_id} ->200___________________________
 
 5. 只修改某本书的价格
-   你的设计：____________________________________
+   你的设计：_________PATCH /books/{books_id}__->200_________________________
 
 6. 删除一本书
-   你的设计：____________________________________
+   你的设计：________DELETE___/books/{books_id}_->204________________________
 
 7. 搜索书籍（按关键词 + 价格范围 + 分页）
-   你的设计：____________________________________
+   你的设计：________GET /books/{books_id}/?keyword=python&price_min=10&price_max=20&pages=10_->200___________________________
 
 8. 查看某本书的所有评论
-   你的设计：____________________________________
+   你的设计：_________GET /books/{books_id}/comments_->_200_________________________
 
 9. 给某本书添加一条评论
-   你的设计：____________________________________
+   你的设计：_______POST /books/{books_id}/comments______->200_______________________
 
 10. 删除某条评论
-    你的设计：____________________________________
+    你的设计：_______DELETE /books/{books_id}/comments/{comments_id}_->204____________________________
 """
+
 
 # ==================== 参考答案 ====================
 def check_exercise_1():
@@ -58,16 +58,19 @@ def check_exercise_1():
     print("【练习 1 参考答案】在线书店 API 设计")
     print("=" * 50)
     answers = [
-        ("1. 查看所有书籍",     "GET    /books                                    → 200"),
-        ("2. 查看一本书详情",   "GET    /books/{book_id}                        → 200"),
-        ("3. 添加新书",        "POST   /books                                   → 201"),
+        ("1. 查看所有书籍", "GET    /books                                    → 200"),
+        ("2. 查看一本书详情", "GET    /books/{book_id}                        → 200"),
+        ("3. 添加新书", "POST   /books                                   → 201"),
         ("4. 更新书的全部信息", "PUT    /books/{book_id}                        → 200"),
-        ("5. 只修改价格",      "PATCH  /books/{book_id}                        → 200"),
-        ("6. 删除书",          "DELETE /books/{book_id}                        → 204"),
-        ("7. 搜索书籍",        "GET    /books?keyword=python&min_price=20&max_price=100&page=1&size=20 → 200"),
-        ("8. 查看书的评论",    "GET    /books/{book_id}/reviews                → 200"),
-        ("9. 添加评论",        "POST   /books/{book_id}/reviews                → 201"),
-        ("10. 删除评论",       "DELETE /books/{book_id}/reviews/{review_id}    → 204"),
+        ("5. 只修改价格", "PATCH  /books/{book_id}                        → 200"),
+        ("6. 删除书", "DELETE /books/{book_id}                        → 204"),
+        (
+            "7. 搜索书籍",
+            "GET    /books?keyword=python&min_price=20&max_price=100&page=1&size=20 → 200",
+        ),
+        ("8. 查看书的评论", "GET    /books/{book_id}/reviews                → 200"),
+        ("9. 添加评论", "POST   /books/{book_id}/reviews                → 201"),
+        ("10. 删除评论", "DELETE /books/{book_id}/reviews/{review_id}    → 204"),
     ]
     for desc, answer in answers:
         print(f"  {desc}")
@@ -90,13 +93,14 @@ def check_exercise_1():
   6. GET  /api/search?word=python  → 搜索帖子（keyword 参数名叫 word）
 
 问题清单：
-  第 1 条：____________________________________
-  第 2 条：____________________________________
-  第 3 条：____________________________________
-  第 4 条：____________________________________
-  第 5 条：____________________________________
-  第 6 条：____________________________________
+  第 1 条：___GET /api/posts_________________________________
+  第 2 条：___POST /api/posts________________________________
+  第 3 条：____DELETE /api/posts/123________________________________
+  第 4 条：____GET /api/users/123/posts________________________________
+  第 5 条：____PATCH /api/posts/123________________________________
+  第 6 条：____GET /api/posts?keyword=python________________________________
 """
+
 
 # ==================== 参考答案 ====================
 def check_exercise_2():
@@ -104,23 +108,30 @@ def check_exercise_2():
     print("【练习 2 参考答案】找茬修正")
     print("=" * 50)
     corrections = [
-        ("1. POST /api/getAllPosts",
-         "❌ URL 里有动词 + 方法用错\n   ✅ GET /api/posts"),
-
-        ("2. GET /api/addPost",
-         "❌ URL 有动词 + GET 不应创建资源 + 数据不该放 URL\n   ✅ POST /api/posts （数据放在请求体中）"),
-
-        ("3. POST /api/deletePost/123",
-         "❌ URL 有动词 + 方法用错\n   ✅ DELETE /api/posts/123"),
-
-        ("4. GET /api/user/123/posts",
-         "❌ 名词没用复数\n   ✅ GET /api/users/123/posts"),
-
-        ("5. POST /api/updatePost/123",
-         "❌ URL 有动词 + 方法应用 PUT 或 PATCH\n   ✅ PUT /api/posts/123 （全量更新）或 PATCH /api/posts/123 （部分更新）"),
-
-        ("6. GET /api/search?word=python",
-         "⚠️ 可以用，但更好的设计是直接对资源搜索\n   ✅ GET /api/posts?keyword=python"),
+        (
+            "1. POST /api/getAllPosts",
+            "❌ URL 里有动词 + 方法用错\n   ✅ GET /api/posts",
+        ),
+        (
+            "2. GET /api/addPost",
+            "❌ URL 有动词 + GET 不应创建资源 + 数据不该放 URL\n   ✅ POST /api/posts （数据放在请求体中）",
+        ),
+        (
+            "3. POST /api/deletePost/123",
+            "❌ URL 有动词 + 方法用错\n   ✅ DELETE /api/posts/123",
+        ),
+        (
+            "4. GET /api/user/123/posts",
+            "❌ 名词没用复数\n   ✅ GET /api/users/123/posts",
+        ),
+        (
+            "5. POST /api/updatePost/123",
+            "❌ URL 有动词 + 方法应用 PUT 或 PATCH\n   ✅ PUT /api/posts/123 （全量更新）或 PATCH /api/posts/123 （部分更新）",
+        ),
+        (
+            "6. GET /api/search?word=python",
+            "⚠️ 可以用，但更好的设计是直接对资源搜索\n   ✅ GET /api/posts?keyword=python",
+        ),
     ]
     for original, explanation in corrections:
         print(f"\n  原始：{original}")
@@ -146,28 +157,27 @@ def exercise_3_json_practice():
         "age": 21,
         "is_student": True,
         "courses": ["Python", "HTTP", "FastAPI"],
-        "address": {
-            "city": "北京",
-            "zipcode": "100000"
-        },
+        "address": {"city": "北京", "zipcode": "100000"},
         "girlfriend": None,
     }
 
     # 在这里写你的代码：
-    # json_str = ???
+    # json_str = json.dumps(user_data,ensure_ascii=False,indent=2)
     json_str = json.dumps(user_data, ensure_ascii=False, indent=2)
 
     print("\nPython 字典 → JSON 字符串：")
     print(json_str)
 
     # 验证
-    assert '"name": "张三"' in json_str or '"name":"张三"' in json_str.replace(" ", ""), "JSON 应包含 name"
+    assert '"name": "张三"' in json_str or '"name":"张三"' in json_str.replace(
+        " ", ""
+    ), "JSON 应包含 name"
     assert "true" in json_str, "Python 的 True 应转为 JSON 的 true"
     assert "null" in json_str, "Python 的 None 应转为 JSON 的 null"
     print("✅ 转换正确！\n")
 
     # TODO 2：将以下 JSON 字符串解析为 Python 字典
-    json_input = '''
+    json_input = """
     {
         "title": "Day 24 学习笔记",
         "tags": ["RESTful", "HTTP", "API"],
@@ -175,17 +185,21 @@ def exercise_3_json_practice():
         "views": 42,
         "author": null
     }
-    '''
+    """
 
     # 在这里写你的代码：
-    # parsed = ???
+    # parsed = json.loads(json_input)
     parsed = json.loads(json_input)
 
     print("JSON 字符串 → Python 字典：")
     print(f"  标题：{parsed['title']}")
     print(f"  标签：{parsed['tags']}")
-    print(f"  已发布：{parsed['published']}（Python 类型：{type(parsed['published']).__name__}）")
-    print(f"  作者：{parsed['author']}（Python 类型：{type(parsed['author']).__name__}）")
+    print(
+        f"  已发布：{parsed['published']}（Python 类型：{type(parsed['published']).__name__}）"
+    )
+    print(
+        f"  作者：{parsed['author']}（Python 类型：{type(parsed['author']).__name__}）"
+    )
 
     # 验证
     assert parsed["published"] is False, "JSON false 应转为 Python False"
@@ -211,6 +225,7 @@ def exercise_3_json_practice():
 
     # 清理测试文件
     import os
+
     os.remove(filename)
     print("✅ 测试文件已清理\n")
 
@@ -228,32 +243,25 @@ def exercise_3_json_practice():
 💡 提示：写三个函数 success_response(), error_response(), list_response()
 """
 
+
 # TODO：在下面实现你的函数
 def success_response(data, message="success"):
     """成功响应"""
     # 在这里写你的代码
-    pass
+    return {"code": 200, "message": message, "data": data}
+
 
 def error_response(code, message):
     """错误响应"""
     # 在这里写你的代码
-    pass
+    return {"code": code, "message": message, "data": None}
+
 
 def list_response(data, page, size, total):
     """列表响应（带分页）"""
-    # 在这里写你的代码
-    pass
-
-
-# ==================== 参考答案 ====================
-def success_response_answer(data, message="success"):
-    return {"code": 200, "message": message, "data": data}
-
-def error_response_answer(code, message):
-    return {"code": code, "message": message, "data": None}
-
-def list_response_answer(data, page, size, total):
     import math
+
+    # 在这里写你的代码
     return {
         "code": 200,
         "message": "success",
@@ -263,7 +271,32 @@ def list_response_answer(data, page, size, total):
             "size": size,
             "total": total,
             "total_pages": math.ceil(total / size) if size > 0 else 0,
-        }
+        },
+    }
+
+
+# ==================== 参考答案 ====================
+def success_response_answer(data, message="success"):
+    return {"code": 200, "message": message, "data": data}
+
+
+def error_response_answer(code, message):
+    return {"code": code, "message": message, "data": None}
+
+
+def list_response_answer(data, page, size, total):
+    import math
+
+    return {
+        "code": 200,
+        "message": "success",
+        "data": data,
+        "pagination": {
+            "page": page,
+            "size": size,
+            "total": total,
+            "total_pages": math.ceil(total / size) if size > 0 else 0,
+        },
     }
 
 
@@ -273,14 +306,30 @@ def check_exercise_4():
     print("=" * 50)
 
     print("\n成功响应：")
-    print(json.dumps(success_response_answer({"id": 1, "name": "张三"}), ensure_ascii=False, indent=2))
+    print(
+        json.dumps(
+            success_response_answer({"id": 1, "name": "张三"}),
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
 
     print("\n错误响应：")
-    print(json.dumps(error_response_answer(404, "用户不存在"), ensure_ascii=False, indent=2))
+    print(
+        json.dumps(
+            error_response_answer(404, "用户不存在"), ensure_ascii=False, indent=2
+        )
+    )
 
     print("\n列表响应：")
     users = [{"id": 1, "name": "张三"}, {"id": 2, "name": "李四"}]
-    print(json.dumps(list_response_answer(users, page=1, size=20, total=55), ensure_ascii=False, indent=2))
+    print(
+        json.dumps(
+            list_response_answer(users, page=1, size=20, total=55),
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
     print()
 
 
@@ -290,15 +339,16 @@ def check_exercise_4():
 """
 为以下每个场景选择最合适的 HTTP 状态码：
 
-1. 用户注册成功 → _____
-2. 用户请求的资源格式不支持（如请求 XML 但只支持 JSON）→ _____
-3. 用户上传的文件太大，超出限制 → _____
-4. 用户短时间内发送了太多请求 → _____
-5. 服务器正在维护，暂时不可用 → _____
-6. 请求成功，但返回的数据是缓存中的旧数据 → _____（提示：不是 200）
-7. 创建资源成功，但不需要返回内容 → _____（提示：不是 201）
-8. 请求需要重定向到新的 URL → _____
+1. 用户注册成功 → _201____
+2. 用户请求的资源格式不支持（如请求 XML 但只支持 JSON）→ __406/415____#415看懂了你发的请求，但是不接受你提交数据的格式 400请求报文结构写错了
+3. 用户上传的文件太大，超出限制 → _413___
+4. 用户短时间内发送了太多请求 → _429____
+5. 服务器正在维护，暂时不可用 → __503___
+6. 请求成功，但返回的数据是缓存中的旧数据 → _304____（提示：不是 200）
+7. 创建资源成功，但不需要返回内容 → __204___（提示：不是 201）
+8. 请求需要重定向到新的 URL → __301/302___
 """
+
 
 # ==================== 参考答案 ====================
 def check_exercise_5():
