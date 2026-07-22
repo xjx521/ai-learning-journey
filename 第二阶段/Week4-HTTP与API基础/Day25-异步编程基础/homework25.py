@@ -9,7 +9,6 @@ Day 25 练习题：Python 异步编程基础
 import asyncio
 import time
 
-
 # ============================================================
 # 【练习 1】理解执行顺序（先预测，再运行验证）
 # ============================================================
@@ -17,26 +16,30 @@ import time
 阅读以下代码，先预测输出顺序和总耗时，再运行验证。
 
 问题 1.1：输出的顺序是什么？
-  你的预测：_____________
+  你的预测：_____a开始->b开始->c开始->c完成->a完成->b完成________
 
 问题 1.2：总耗时大约是多少秒？
-  你的预测：_____________
+  你的预测：______2.0秒_______
 """
+
 
 async def task_a():
     print("A: 开始")
     await asyncio.sleep(1)
     print("A: 完成")
 
+
 async def task_b():
     print("B: 开始")
     await asyncio.sleep(2)
     print("B: 完成")
 
+
 async def task_c():
     print("C: 开始")
     await asyncio.sleep(0.5)
     print("C: 完成")
+
 
 async def exercise_1():
     print("=" * 50)
@@ -65,10 +68,12 @@ async def exercise_1():
 你需要补全异步部分的代码。
 """
 
+
 def sync_fetch(name, delay):
     """模拟同步网络请求"""
     time.sleep(delay)
     return f"{name} 的数据"
+
 
 async def async_fetch(name, delay):
     """模拟异步网络请求"""
@@ -77,7 +82,8 @@ async def async_fetch(name, delay):
     await asyncio.sleep(delay)
     return f"{name} 的数据"
 
-def exercise_2():
+
+async def exercise_2():
     print("\n" + "=" * 50)
     print("【练习 2】同步 vs 异步 耗时对比")
     print("=" * 50)
@@ -111,7 +117,7 @@ def exercise_2():
         print(f"  异步总耗时：{async_time:.1f} 秒")
         return sync_time, async_time
 
-    sync_time, async_time = asyncio.run(run_async())
+    sync_time, async_time = await run_async()
 
     print(f"\n💡 同步耗时 {sync_time:.1f}s vs 异步耗时 {async_time:.1f}s")
     print(f"   异步快了约 {sync_time / async_time:.1f} 倍！")
@@ -128,12 +134,14 @@ def exercise_2():
 模拟一个"爬虫"场景：需要从 5 个网站获取数据，每个网站响应时间不同。
 """
 
+
 async def fetch_website(name, delay):
     """模拟请求一个网站"""
     print(f"  ⏳ 开始获取 {name}（需要 {delay} 秒）...")
     await asyncio.sleep(delay)
     print(f"  ✅ {name} 获取完成！")
     return {"site": name, "data": f"来自 {name} 的数据", "time": delay}
+
 
 async def exercise_3():
     print("\n" + "=" * 50)
@@ -190,8 +198,8 @@ async def greet(name):
 result = greet("World")
 print(result)
 ```
-问题：____________________________________
-修正：____________________________________
+问题：___________result = greet("World") 不能直接调用生成的是一个协程对象_________________________
+修正：_________result=asyncio.run(greet("World"))___________________________
 
 代码 2：
 ```python
@@ -199,8 +207,8 @@ def fetch_data():
     data = await some_api_call()
     return data
 ```
-问题：____________________________________
-修正：____________________________________
+问题：________def fetch_data(): 普通函数不能调用await____________________________
+修正：________async def fetch_data()____________________________
 
 代码 3：
 ```python
@@ -208,9 +216,10 @@ async def slow_task():
     time.sleep(5)  # 阻塞调用
     return "done"
 ```
-问题：____________________________________
-修正：____________________________________
+问题：_______time.sleep(5)阻塞调用_____________________________
+修正：_______await asyncio.sleep(5)_____________________________
 """
+
 
 # ==================== 参考答案 ====================
 def check_exercise_4():
@@ -246,7 +255,12 @@ async def countdown(name, seconds):
     4. 使用 await asyncio.sleep(1) 而不是 time.sleep(1)
     """
     # 在这里写你的代码
-    pass
+    while seconds >= 1:
+        print(f"[{name}] 剩余{seconds}秒")
+        await asyncio.sleep(1)
+        seconds -= 1
+    print(f" [{name}] 🎉 时间到！")
+
 
 async def exercise_5():
     print("\n" + "=" * 50)
@@ -257,7 +271,7 @@ async def exercise_5():
     # 一个 "Timer A" 3 秒，一个 "Timer B" 5 秒
     # 💡 提示：用 asyncio.gather
     #
-    # 你的代码写在这里：
+    # 你的代码写在这里： await asyncio.gather(countdown("Timer A",3),countdown("Timer B",5),)
 
     await asyncio.gather(
         countdown("Timer A", 3),
@@ -300,7 +314,7 @@ if __name__ == "__main__":
 
     async def run_all():
         await exercise_1()
-        exercise_2()
+        await exercise_2()
         await exercise_3()
         check_exercise_4()
 
