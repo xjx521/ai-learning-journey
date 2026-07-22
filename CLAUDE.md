@@ -69,11 +69,12 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 
 ## 学习进度
 
-当前阶段：第二阶段 | 当前进度：Day 24 已完成 | LeetCode：0题 | 最后更新：2026-07-21
+当前阶段：第二阶段 | 当前进度：Day 25 已完成 | LeetCode：0题 | 最后更新：2026-07-22
 
 ### 练习完成记录
 | 日期 | Day | 完成题数 | 掌握度 | 备注 |
 |------|-----|---------|--------|------|
+| 07-22 | Day25 | 5/5 | 良好 | 异步编程基础：执行顺序预测(gather并发按完成时间排序)/同步vs异步耗时对比(sync 3.0s→async 1.0s,3倍提升)/异步爬虫模拟(5网站并发5.8s→2.0s,节省3.8s)/async常见错误找茬(3个:未await协程/普通函数用await/async里用time.sleep)/异步倒计时器(while循环+asyncio.sleep双并发)。核心修复：exercise_2加async def+调用处await+内部asyncio.run改await(不能嵌套事件循环)。掌握核心规则：一个程序只有一个asyncio.run()入口，内部用await |
 | 07-21 | Day24 | 5/5 | 良好 | RESTful API设计：在线书店API CRUD设计(10题)/社交媒体API找茬修正(6题)/JSON序列化反序列化+文件读写(3题)/统一响应格式3函数(成功/错误/分页列表)/HTTP状态码选择(8题：201/406/413/429/503/304/204/301)。掌握了RESTful核心原则（URL=名词/方法=动词、复数名词、嵌套≤2层、查询参数过滤分页），理解了PUT(全量)vs PATCH(部分)、201vs204、304缓存机制 |
 | 07-21 | Day23 | 5/5 | 良好 | 观察HTTP请求：F12观察B站搜索API/请求头/Cookie+自建HTTP服务器(GET/POST+修复404双重send_response bug)+requests实验(UA伪装/Session管理Cookie/超时控制)+curl 5命令+Postman/Apifox 4任务。额外完成本地httpbin项目(my_httpbin.py)，支持6个端点(/get、/post、/status、/headers、/delay、/)，作为后续Day24-28的长期调试工具 |
 | 07-19 | Day22 | 9/9 | 良好 | HTTP协议基础：URL结构/HTTP方法/状态码/请求头/requests库GET-POST/CRUD模拟。遇到httpbin.org连接问题，改用postman-echo.com完成。深入理解了GET vs POST区别（params vs json）、405状态码、请求头回显原理、301重定向机制 |
