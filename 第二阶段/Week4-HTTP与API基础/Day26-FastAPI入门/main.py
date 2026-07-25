@@ -18,7 +18,7 @@ def read_root():
 
 # 【实验 2】路径参数 — 动态 URL
 @app.get("/users/{user_id}")
-def get_user(user_id: str):
+def get_user(user_id: int):
     return {"user_id": user_id, "type": type(user_id).__name__}
 
 

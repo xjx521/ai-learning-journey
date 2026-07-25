@@ -10,7 +10,6 @@ Day 27 练习题：FastAPI 进阶 — 请求体、响应模型、数据验证
 💡 建议：所有实验写在同一个 main.py 中，逐个添加接口。
 """
 
-
 # ============================================================
 # 【实验 1】第一个请求体
 # ============================================================
@@ -46,28 +45,41 @@ def create_book(book: BookCreate):
 ```json
 {"title": "Python入门", "author": "张三", "price": 59.9, "isbn": "978-7-111"}
 ```
-结果：_________
+结果：__{
+  "message": "《Python入门》创建成功",
+  "author": "张三",
+  "price": 59.9
+}_______
 
 测试 2：缺少必填字段 title
 ```json
 {"author": "张三", "price": 59.9}
 ```
-结果：_________
+结果：___msg": "Field required",
+      "input": {
+        "author": "张三",
+        "price": 59.9,
+        "isbn": "978-7-111"__422错误缺少必填值____
 
 测试 3：类型错误
 ```json
 {"title": "Python入门", "author": "张三", "price": "五十九块九"}
 ```
-结果：_________
+结果：___msg": "Input should be a valid number, unable to parse string as a number",
+      "input": "五十九快就"_422错误_____
 
 测试 4：不传可选字段 isbn
 ```json
 {"title": "Python入门", "author": "张三", "price": 59.9}
 ```
-结果：_________
+结果：__{
+  "message": "《Python入门》创建成功",
+  "author": "张三",
+  "price": 59.9
+}200正常创建 isbn有默认值None_______
 
 问题 1.1：Pydantic 是怎么知道哪些字段必填、哪些可选的？
-你的答案：_____________
+你的答案：___看有没有默认值有默认值就是可选的__________
 """
 
 # ==================== 参考答案 ====================
@@ -100,17 +112,20 @@ class ProductCreate(BaseModel):
 
 | 输入 | 期望结果 | 实际结果 |
 |------|---------|---------|
-| {"name": "A", "price": 10} | 422（name 太短） | _________ |
-| {"name": "手机", "price": -5} | _________ | _________ |
-| {"name": "手机", "price": 100000} | _________ | _________ |
-| {"name": "手机", "price": 99} | 成功，stock=0 | _________ |
+| {"name": "A", "price": 10} | 422（name 太短） | _422__"String should have at least 2 characters_____ |
+| {"name": "手机", "price": -5} | _422（price gt=0）________ | ___422nput should be greater than ______ |
+| {"name": "手机", "price": 100000} | __422（le=999999）_______ | _422"Input should be less than or equal to 99999________ |
+| {"name": "手机", "price": 99} | 成功，stock=0 | __成功{
+  "name": "手机",
+  "price": 99
+}_______ |
 
 问题 2.1：gt=0 和 ge=0 有什么区别？
-你的答案：_____________
+你的答案：__gt是小于0_，ge是小于等于0__________
 
 💡 破坏性实验：
   把 price: float = Field(..., gt=0) 改成 price: float = Field(default=0, gt=0)
-  然后发送 {"name": "测试"}（不传 price），会怎样？
+  然后发送 {"name": "测试"}（不传 price），会怎样？422错误 JSON decode error" 不传price但是默认值和为0不满足gt=0的验证 所以默认值也应该满足验证规则
 """
 
 # ==================== 参考答案 ====================
@@ -156,10 +171,10 @@ def create_user(user: UserCreate):
   POST /users {"username": "zhangsan", "password": "123456", "email": "z@test.com"}
 
 问题 3.1：响应中包含 password 字段吗？
-你的答案：_____________
+你的答案：__不包含，被response_model过滤了___________
 
 问题 3.2：在 /docs 中查看 POST /users 的响应示例，看到了什么？
-你的答案：_____________
+你的答案：___只显示username和password不显示password__________
 """
 
 # ==================== 参考答案 ====================
@@ -200,15 +215,20 @@ def create_company(company: CompanyCreate):
 你的 JSON：
 ```json
 {
-
+"name"xjx",
+"employees":["11","22"],
+"address":{
+"city":"huizhou","street":"longfeng"},
+"tags":["11","22222"]
 }
 ```
 
 问题 4.1：address 字段在 JSON 中是什么结构？
-你的答案：_____________
+你的答案：___是嵌套对象Addressaddress":{
+"city":"huizhou","street":"longfeng"},__________
 
 问题 4.2：如果 address 中缺少 city 字段会怎样？
-你的答案：_____________
+你的答案：__会报错422错误_address.city field required__________
 """
 
 # ==================== 参考答案 ====================
@@ -254,15 +274,29 @@ def delete_todo(todo_id: int):
 ```
 
 测试：
-  GET /todos/1 → _________
-  GET /todos/999 → _________
-  DELETE /todos/1 → _________
-  DELETE /todos/999 → _________
-  GET /todos/1 （删除后再查）→ _________
+  GET /todos/1 → ___200 {
+  "title": "学习 Python",
+  "completed": false
+}______
+  GET /todos/999 → _404错误{
+  "detail": "待办事项不存在"
+}________
+  DELETE /todos/1 → _204无内容________
+  DELETE /todos/999 → _404错误{
+  "detail": "待办事项不存在"
+}________
+  GET /todos/1 （删除后再查）→ __404{
+  "detail": "待办事项不存在"
+}_______
 
 💡 破坏性实验：
   把 detail="待办事项不存在" 改成 detail={"error": "not_found", "id": todo_id}
-  观察 /docs 中错误响应的格式变化。
+  观察 /docs 中错误响应的格式变化。404错误 detail传字典{
+  "detail": {
+    "error": "not_found",
+    "id": 999
+  }返回一个对象
+}
 """
 
 # ==================== 参考答案 ====================
@@ -307,10 +341,10 @@ def update_item(
   Body: {"price": 29.9}
 
 问题 6.1：返回值中 updates 包含哪些字段？为什么 name 和 description 不在里面？
-你的答案：_____________
+你的答案：__只有{}"price"：29.9}___因为exclude_unset=True)  # 只获取实际传的字段________
 
 问题 6.2：exclude_unset=True 的作用是什么？
-你的答案：_____________
+你的答案：__表示排除没有设置的字段___________
 """
 
 # ==================== 参考答案 ====================
