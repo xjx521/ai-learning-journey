@@ -95,10 +95,10 @@ conn.close()
 📝 **测试 1.1**：运行上面的代码，观察输出结果。
 
 📝 **测试 1.2**：再运行一次（重复插入相同的用户名会怎样？）
-
+会报错 用户名定义了UNIQUE只能唯一不能重复
 ❓ **问题 1.1**：为什么 INSERT 用 `?` 占位符而不是 f-string？
-
-❓ **问题 1.2**：completed 字段为什么用 INTEGER（0/1）而不是 TEXT（'已完成'/'未完成'）？
+防止SQL注入攻击
+❓ **问题 1.2**：completed 字段为什么用 INTEGER（0/1）而不是 TEXT（'已完成'/'未完成'）？数字比字符串更快
 """
 
 
@@ -152,16 +152,20 @@ conn.close()
 ```
 
 📝 **测试 2.1**：completed = 1 的有几条？分别是什么？
-
+两条 背单词 — 学习
+交房租 — 生活
 📝 **测试 2.2**：user_id = 2（lisi）的待办有哪些？
-
+[用户2] 写周报 — 本周完成Web框架学习
+[用户2] 背单词 — 英语六级词汇
 📝 **测试 2.3**：LIKE '%学%' 匹配了哪些待办？
-
+#4 背单词 [学习]
+#1 学习 SQL [学习]
 📝 **测试 2.4**：第2页第2条是什么？
-
+背单词
 ❓ **问题 2.1**：LIMIT 和 OFFSET 的顺序能调换吗？为什么？
-
-❓ **问题 2.2**：ORDER BY 不指定的话，结果的顺序是固定的吗？
+SQL 标准执行顺序是 ORDER BY -> LIMIT -> OFFSET。SQLite 允许互换位置但不推荐。
+         正确的语义：先排好序，取前 N 条，跳过 M 条。写成标准顺序不容易出错。
+❓ **问题 2.2**：ORDER BY 不指定的话，结果的顺序是固定的吗？不是 ORDER BY指定id排序
 """
 
 
@@ -188,10 +192,10 @@ print(f"影响了 {cursor.rowcount} 行")
 
 # --- 练习 3.2：同时更新多个字段 ---
 cursor.execute(
-    """UPDATE todos
-       SET title = ?, updated_at = date('now')
-       WHERE id = ?""",
-    ("买全脂牛奶", 2)     # 给updated_at加一个字段演示多字段更新
+    "UPDATE todos
+       SET title = ?, created_at = date('now')
+       WHERE id = ?",
+    ("买全脂牛奶", 2)     # 给created_at加一个字段演示多字段更新
 )
 print(f"更新了 {cursor.rowcount} 行")
 
@@ -212,19 +216,20 @@ conn.close()
 ```
 
 📝 **测试 3.1**：UPDATE 后 affected rows 是多少？
-
+影响了1行
 📝 **测试 3.2**：如果 WHERE 条件是 title = '学'（模糊匹配）呢？会发生什么？
-
+会报错 数据库中没有完全等于学的行 模糊匹配要用LIKE
 📝 **测试 3.3**：DELETE 后还能恢复吗？
-
+不能
 💡 **破坏性实验**（千万别在真实项目上试）：
 把 UPDATE todos SET completed = 1 WHERE title = '买牛奶' 里的 WHERE 去掉：
 ```sql
 UPDATE todos SET completed = 1;
 ```
 会发生什么？想一想，然后再自己试试看。
-
+会把所有completed设置为1
 ❓ **问题 3.1**：如何批量把所有"学习"分类的待办改为已完成？
+UPDATE todos SET completed = 1 WHERE category = '学习';
 """
 
 
@@ -245,31 +250,31 @@ cursor = conn.cursor()
 
 # --- INNER JOIN ---
 print("=== INNER JOIN：有匹配的才显示 ===")
-cursor.execute("""
+cursor.execute("
     SELECT u.username, t.title, t.completed, t.category
     FROM users u
     INNER JOIN todos t ON u.id = t.user_id
     ORDER BY u.id, t.id
-""")
+")
 for row in cursor.fetchall():
     done = "✅已完成" if row["completed"] else "❌未完成"
     print(f"  [{row['username']}] {row['title']} [{row['category']}] {done}")
 
 # --- LEFT JOIN ---
 print("\n=== LEFT JOIN：左表全部保留 ===")
-cursor.execute("""
+cursor.execute("
     SELECT u.username, t.title, t.completed
     FROM users u
     LEFT JOIN todos t ON u.id = t.user_id
     ORDER BY u.id
-""")
+")
 for row in cursor.fetchall():
     title = row["title"] if row["title"] else "(暂无待办)"
     print(f"  {row['username']} → {title}")
 
 # --- 分组统计 ---
 print("\n=== 按用户统计待办数量 ===")
-cursor.execute("""
+cursor.execute("
     SELECT u.username,
            COUNT(t.id) as total,
            SUM(CASE WHEN t.completed = 1 THEN 1 ELSE 0 END) as done_count
@@ -277,7 +282,7 @@ cursor.execute("""
     LEFT JOIN todos t ON u.id = t.user_id
     GROUP BY u.id
     HAVING total > 0
-""")
+")
 for row in cursor.fetchall():
     print(f"  {row['username']}：{row['total']}条待办，完成{row['done_count']}条")
 
@@ -285,13 +290,13 @@ conn.close()
 ```
 
 📝 **测试 4.1**：INNER JOIN 结果中 wangwu 出现了吗？为什么？
-
+没有 todos表没有对应id
 📝 **测试 4.2**：LEFT JOIN 结果中 wangwu 出现了吗？右边填了什么？
-
+出现了 填了null
 ❓ **问题 4.1**：什么时候该用 INNER JOIN，什么时候该用 LEFT JOIN？
-
+需要查看所有用户名单用INNER JOIN 查看所有待办事项用LEFT JOIN
 ❓ **问题 4.2**：`SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END)` 这个写法什么意思？试着用 Python 代码翻译一遍。
-"""
+sum(1 if completed else 0 for todo in todos)"""
 
 
 # ============================================================
@@ -314,23 +319,23 @@ total = cursor.fetchone()[0]
 print(f"总待办数：{total}")
 
 # --- 按分类统计 ---
-cursor.execute("""
+cursor.execute("
     SELECT category, COUNT(*) as cnt
     FROM todos
     GROUP BY category
     ORDER BY cnt DESC
-""")
+")
 print("\n=== 各分类待办数量 ===")
 for row in cursor.fetchall():
     print(f"  {row[0]}：{row[1]}条")
 
 # --- 按用户统计 ---
-cursor.execute("""
+cursor.execute("
     SELECT u.username, COUNT(t.id) as count
     FROM users u
     LEFT JOIN todos t ON u.id = t.user_id
     GROUP BY u.id
-""")
+")
 print("\n=== 每人待办数 ===")
 for row in cursor.fetchall():
     print(f"  {row[0]}：{row[1]}条")
@@ -344,8 +349,9 @@ conn.close()
 ```
 
 ❓ **问题 5.1**：GROUP BY 后面能不能跟一个非聚合列？比如 `SELECT category, title FROM todos GROUP BY category`？为什么？
-
+不能
 ❓ **问题 5.2**：HAVING 和 WHERE 有什么区别？
+where过滤分组前结果 HAVING过滤分组后结果
 """
 
 
