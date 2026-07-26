@@ -7,26 +7,12 @@ Day 30 练习题：SQLAlchemy ORM 基础 — 模型定义、CRUD、关系映射
     （不需要安装数据库！SQLite 是 Python 内置的）
 
 💡 建议：所有实验写在 main.py 中，逐个添加测试通过后再继续。
+完成每一个「测试」和「问题」后再翻到文件末尾的参考答案。
 """
 
 from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, DateTime, func
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, relationship
-
-# ============================================================
-# 共享配置（每个实验开头都要写）
-# ============================================================
-class Base(DeclarativeBase):
-    pass
-
-engine = create_engine("sqlite:///orm_test.db", echo=False)
-
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def get_db():
-    """每次实验创建新的 Session"""
-    return SessionLocal()
 
 
 # ============================================================
@@ -69,25 +55,15 @@ class Todo(Base):
     owner = relationship("User", back_populates="todos")
 ```
 
-测试 1：检查两个模型是否正确定义了字段
-结果：_____user有id/username/email/hashed_password；todo有id/title/description/category/completed/user_id_________
+📝 **测试 1.1**：检查两个模型是否正确定义了字段——分别列出 User 和 Todo 的属性名。
 
-测试 2：运行 Base.metadata.create_all(bind=engine) 后生成了什么？
-结果：___orm_test.db 文件里自动创建了 users 表和 todos 表，可以用 sqlite3 orm_test.db → .schema 查看______
+📝 **测试 1.2**：运行 `Base.metadata.create_all(bind=engine)` 后生成了什么？
+      用 sqlite3 命令行打开生成的 .db 文件，输入 `.schema` 看看实际建了什么表。
 
-问题 1.1：cascade="all, delete-orphan" 的作用是什么？
-你的答案：___级联删除——删除 User 时，他的所有 Todo 也一起被删了__________
+❓ **问题 1.1**：`cascade="all, delete-orphan"` 的作用是什么？
 
-问题 1.2：back_populates 需要两边都写吗？如果只在一边写会怎样？
-你的答案：___两边都要写。单向写只能从一方访问另一方（比如只有 User.todos），但不能从 todo.owner 拿到所属用户_________
+❓ **问题 1.2**：`back_populates` 需要两边都写吗？如果只在一边写会怎样？
 """
-
-# ==================== 参考答案 ====================
-# 导入刚才定义的模型后：
-# from models import Base, User, Todo
-# engine = create_engine("sqlite:///orm_test.db")
-# Base.metadata.create_all(bind=engine)
-# 成功生成两张表！
 
 
 # ============================================================
@@ -154,34 +130,18 @@ print(f"未完成数：{db.query(Todo).filter(Todo.completed==False).count()}")
 db.close()
 ```
 
-测试 2.1：插入 1 个用户 + 2 个待办，查询结果对吗？
-结果：___用户1人，待办2条_________
+📝 **测试 2.1**：插入 1 个用户 + 2 个待办，查询结果对吗？分别打印出数量。
 
-测试 2.2：更新 todo1 的标题和 completed 后，再查一次得到什么？
-结果：___title变成"复习SQL"且completed为True__________
+📝 **测试 2.2**：更新 todo1 的标题和 completed 后，再查一次得到的结果是什么？
 
-测试 2.3：删除 todo2 后，剩余的待办数是几？
-结果：____1条_________
+📝 **测试 2.3**：删除 todo2 后，剩余的待办数是几？
 
-💡 **破坏性实验：**
-把 `db.commit()` 注释掉，然后再查数据库——数据还在吗？
-不在！因为 commit 之前修改只在 Session 缓冲区，没写入硬盘。
+💡 **破坏性实验**：把 `db.commit()` 注释掉，然后再查——数据还在吗？为什么？
 
-问题 2.1：db.refresh() 什么时候必须用？
-你的答案：___插入后立即需要知道自增 ID 的时候必须用 refresh()，否则新对象的 id 还是 None______
+❓ **问题 2.1**：`db.refresh()` 什么时候必须用？
 
-问题 2.2：db.get(Model, id) 和 db.query(Model).filter(Model.id == id).first() 有什么区别？
-你的答案：___get 直接用主键查，走缓存更快（O(1)）；filter 是通用查询，慢一些但功能更多______
+❓ **问题 2.2**：`db.get(Model, id)` 和 `db.query(Model).filter(Model.id == id).first()` 有什么区别？
 """
-
-# ==================== 参考答案 ====================
-# CRUD 流程总结：
-# 新增：db.add(obj); db.commit()
-# 查询：db.query(Model).filter(...).all() / db.get(Model, id)
-# 更新：obj.attr = value; db.commit()
-# 删除：db.delete(obj); db.commit()
-# 2.1：insert 后立刻需要获取 autoincrement 的 id 时，必须调用 refresh()
-# 2.2：get() 比 query().filter() 快，因为它直接命中主键索引（类似 dict.get()）
 
 
 # ============================================================
@@ -254,33 +214,23 @@ keyword = "学习"
 results = db.query(Todo).filter(Todo.title.like(f"%{keyword}%")).all()
 print(f"\n搜索关键词'{keyword}'：")
 for r in results:
-    print(f"  ✅ {r.title}")
+    print(f"  {r.title}")
 
 db.close()
 ```
 
-测试 Q1：zhangsan 有几条待办？
-结果：____4条_______
+📝 **测试 Q1**：zhangsan 有几条待办？列出标题。
 
-测试 Q4：排序后的顺序是什么？
-结果：___已完成的（学习SQL、买牛奶）排在前面，未完成的学习Python、学习FastAPI、背单词、写周报按标题排序_____
+📝 **测试 Q4**：排序后的完整顺序是什么？
 
-测试 Q5：第1页第3条是什么？
-结果：__学习FastAPI（按ID排序的第3条）_______
+📝 **测试 Q5**：第1页第3条是什么？
 
-测试 Q6：LIKE '%学习%' 匹配了几条？
-结果：___3条（学习Python、学习SQL、学习FastAPI）__________
+📝 **测试 Q6**：LIKE '%学习%' 匹配了几条？分别是什么？
 
-问题 3.1：`db.flush()` 和 `db.commit()` 的区别是什么？
-你的答案：___flush 把数据同步到当前事务的数据库中（能在同一个session中被查到），但不真正提交到磁盘。commit 才是真正持久化保存_____________________
+❓ **问题 3.1**：`db.flush()` 和 `db.commit()` 的区别是什么？
 
-问题 3.2：order_by(Todo.completed.desc(), Todo.title.asc()) 这个写法是什么意思？
-你的答案：___先按 completed 倒序排（True在前），相同completed的再按title正序排（A-Z）______
+❓ **问题 3.2**：`order_by(Todo.completed.desc(), Todo.title.asc())` 这个写法是什么意思？
 """
-
-# ==================== 参考答案 ====================
-# flush vs commit：flush 只是在事务内部生效（可以在同一 session 中立即查到刚插入的数据），commit 才持久化到磁盘
-# order_by 多个参数 = 多级排序，逗号前是第一排序键，逗号后是并列时的第二排序键
 
 
 # ============================================================
@@ -306,8 +256,6 @@ if os.path.exists("join_test.db"):
 
 engine = create_engine("sqlite:///join_test.db")
 _Base.metadata.create_all(bind=engine)
-# 这里用上面 models 里的 Base 来建表——注意如果 models.py 里的 Base 不同
-# 实际使用时请确保用的是同一个 Base
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 db = SessionLocal()
@@ -332,7 +280,6 @@ for user in users:
     print(f"{user.username}:")
     for todo in user.todos:            # 🔴 每次循环都会单独发一条 SQL！
         print(f"  - {todo.title}")
-# 执行了 1 + N 条 SQL：1条查users + N条查每个用户的todos
 
 # --- 方法2：用 joinedload —— 一条 SQL 搞定 ---
 print("\n=== 方法2：joinedload 查询 ===")
@@ -341,27 +288,16 @@ for user in users:
     print(f"{user.username}:")
     for todo in user.todos:            # ✅ 已经预加载好了，不再查数据库
         print(f"  - {todo.title}")
-# 只执行了 1 条 SQL（带 INNER JOIN），性能大幅优化！
 
 db.close()
 ```
 
-测试 N+1 方法：如果有 100 个用户，总共执行几条 SQL？
-结果：__101条（1条查users + 100条查各自的todos）_________
+📝 **测试 4.1**：如果有 100 个用户，"方法1"总共执行几条 SQL？"方法2"呢？
 
-测试 joinedload 方法：100 个用户执行几条 SQL？
-结果：____1条（一条JOIN语句就查完了）___________
+❓ **问题 4.1**：joinedload 生成的 SQL 和原生 JOIN 有什么关系？
 
-问题 4.1：joinedload 生成的 SQL 和原生 JOIN 有什么关系？
-你的答案：___都是INNER JOIN，只是SQLAlchemy帮你自动拼接SQL字符串，你不需要手动写JOIN语法______
-
-问题 4.2：relationship 默认是 lazy loading 还是 eager loading？
-你的答案：___lazy loading（懒加载）。访问 user.todos 时才去查数据库。joinedload 把它改成 earger loading（预加载）_________
+❓ **问题 4.2**：relationship 默认是 lazy loading 还是 eager loading？
 """
-
-# ==================== 参考答案 ====================
-# joinedload 等价于 SQL 中的 SELECT ... LEFT OUTER JOIN ...，一条查询把关联数据全部取回来
-# 对于大量数据的场景，性能差距可能是几十倍甚至上百倍
 
 
 # ============================================================
@@ -407,29 +343,18 @@ print(f"剩余用户数：{len(remaining)}, 剩余待办数：{todo_count}")
 db.close()
 ```
 
-测试：删除 test_user 后，待办还剩几条？
-结果：____0条，cascade="all, delete-orphan" 让删除用户连带删除他的所有待办_________
+📝 **测试 5.1**：删除 test_user 后，待办还剩几条？你是怎么解释这个结果的？
 
-💡 **破坏性实验 1：**
-把 cascade=""（空字符串）去掉或改为 cascade="all"：
-- cascade="all" → 删除用户时 Todo 也被物理删除
-- cascade="all, delete-orphan" → 同上，额外禁止孤儿 Todo
+💡 **破坏性实验 1**：
+把 `cascade="all, delete-orphan"` 去掉（或改为空字符串），再试一次删除用户，观察区别。
 
-💡 **破坏性实验 2：**
-把外键 ForeignKey("users.id") 改为没有 ondelete="CASCADE"：
-删除用户时报错：FOREIGN KEY constraint failed
-因为还有待办引用着这个用户，不允许删除。
+💡 **破坏性实验 2**：
+把外键 `ForeignKey("users.id")` 加上 `ondelete="RESTRICT"`（SQLite 不支持 ON DELETE，改用 Python 逻辑），删除用户时会发生什么？
 
-问题 5.1：如果不想级联删除，应该怎么设置？
-你的答案：___去掉 cascade 或者设为 cascade=""，同时在外键上加 ondelete="RESTRICT"（默认就是RESTRICT）__________
+❓ **问题 5.1**：如果不想级联删除（删除父记录时子记录保留），应该怎么设置？
 
-问题 5.2：ondelete="SET NULL" 有什么用？
-你的答案：___删除父记录时，子记录的 user_id 自动设为 NULL（前提是 user_id 允许为 NULL）__________
+❓ **问题 5.2**：`ondelete="SET NULL"` 有什么用？
 """
-
-# ==================== 参考答案 ====================
-# 5.1：去掉 cascade 参数，保留默认的 RESTRICT 行为
-# 5.2：删除父记录时把子记录的 FK 字段设成 NULL（软断开关系）
 
 
 # ============================================================
@@ -443,13 +368,91 @@ db.close()
 # 2. LeetCode 268 - 缺失的数字（Easy）
 #    链接：https://leetcode.cn/problems/missing-number/
 #    思路提示：数组索引天然对应数字，类似于数据库的主键自增逻辑
+# ============================================================
+
+
+# ============================================================
+# 💡 参考答案（完成所有练习后再看！）
+# ============================================================
 #
-# 💡 哈希表的思维在数据库查询中无处不在——索引的本质就是哈希表
-# ============================================================
+# 使用说明：先独立做完上面所有【测试】和【问题】，再打开这里对照。
+# 如果你的答案思路接近就算对，不必文字完全一致。
+# ------------------------------------------------------------
+
+"""
+== 实验 1 参考答案 ==
+
+测试 1.1：
+  User 属性：id, username, email, hashed_password, todos (relationship)
+  Todo 属性：id, title, description, category, completed, user_id, owner (relationship)
+测试 1.2：orm_test.db 文件里自动创建了 users 表和 todos 两张表。
+         用 .schema 可以看到完整的 CREATE TABLE 语句。
+
+问题 1.1：级联删除——删除 User 对象时，他的所有 Todo 也一起被删除。
+         "all" 表示所有操作都级联，"delete-orphan" 表示孤儿 Todo（没有父用户的）不允许存在。
+问题 1.2：两边都要写。单向声明只能从一方访问另一方：
+         只有 User.todos → 可以用 user.todos 拿到待办，但不能用 todo.owner 拿到所属用户。
+
+== 实验 2 参考答案 ==
+
+测试 2.1：1 个用户（zhangsan），2 条待办（学习 SQL、买牛奶）。
+测试 2.2：title 变成"复习 SQL"，completed 变成 True。
+测试 2.3：剩余 1 条待办（"复习 SQL"）。
+
+破坏性实验：不在！commit 之前修改只在 Session 缓冲区，没写入硬盘。
+           这就是为什么有时需要 rollback() 来撤销未提交的修改。
+
+问题 2.1：插入后立即需要知道自增 ID 的时候必须用 refresh()。
+         否则新对象的 id 还是 None（因为 INSERT 还没真正执行到数据库）。
+问题 2.2：get() 直接用主键查，走缓存更快（类似 dict.get()）；
+         filter 是通用查询，慢一些但功能更多（可以组合多个条件）。
+
+== 实验 3 参考答案 ==
+
+测试 Q1：zhangsan 有 4 条待办：学习 Python ❌、学习 SQL ✅、学习 FastAPI ❌、买牛奶 ✅。
+测试 Q4：排序后的顺序：
+  [学习] 学习SQL (已完成)、[生活] 买牛奶 (已完成)、
+  [学习] 学习FastAPI (未完成)、[学习] 学习Python (未完成)、[学习] 背单词 (未完成)、[工作] 写周报 (未完成)
+测试 Q5：学习 FastAPI（按 ID 排序的第 3 条）。
+测试 Q6：3 条——学习 Python、学习 SQL、学习 FastAPI。
+
+问题 3.1：flush 把数据同步到当前事务的数据库中（能在同一个 session 中被立即查到），
+         但不真正提交到磁盘（其他数据库连接看不到）。
+         commit 才是真正持久化保存（其他连接也能看到，且不可 rollback）。
+问题 3.2：先按 completed 倒序排（True 在前 = 已完成的先出现），
+         completed 相同的再按 title 正序排（A-Z）。
+
+== 实验 4 参考答案 ==
+
+测试 4.1：方法1执行 101 条 SQL（1条查users + 100条每个用户的todos）。
+         方法2只执行 1 条 SQL（带 JOIN 的一次查询）。
+         差距随用户数量线性增长！
+
+问题 4.1：都是 INNER JOIN（LEFT OUTER JOIN）。SQLAlchemy 帮你自动拼接 SQL 字符串，
+         你只需要告诉它"我要预加载哪些关系"。
+问题 4.2：lazy loading（懒加载）。访问 user.todos 时才去查数据库。
+         joinedload 把它改成 eager loading（预加载），一次性取回所有关联数据。
+
+== 实验 5 参考答案 ==
+
+测试 5.1：剩余 0 条待办。因为 cascade="all, delete-orphan" 让删除用户连带删除他的所有待办。
+
+问题 5.1：去掉 cascade 参数，保留默认的 RESTRICT 行为。
+         SQLite 实际上不支持 ON DELETE，需要在 Python 层面处理。
+问题 5.2：删除父记录时把子记录的 FK 字段设为 NULL（软断开关系）。
+         例如删除用户后，该用户的待办依然存在但 user_id 变为 NULL，归属不明。
+         前提是 user_id 允许为 NULL（nullable=True）。
+
+== LeetCode 思路 ==
+
+LC 1：用字典记录 {target - num: index}，遍历一次即可找到配对。类似数据库主键索引 O(1) 查找。
+LC 268：排序后比较索引和值，或者用集合差集。
+         range(len(nums)) 应该包含 0~n，缺的就是缺失的数字。
+"""
 
 
 # ============================================================
-# 学习记录
+# 📝 今日学习记录
 # ============================================================
 """
 📝 Day 30 学习打卡

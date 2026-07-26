@@ -7,6 +7,7 @@ Day 29 练习题：SQL 基础 + SQLite
     所有实验写在 main.py 中运行（不是直接跑 homework）。
 
 💡 建议：创建 main.py，逐个添加实验代码并运行验证。
+完成每一个「测试」和「问题」后再翻到文件末尾的参考答案。
 """
 
 import sqlite3
@@ -91,24 +92,14 @@ for row in cursor.fetchall():
 conn.close()
 ```
 
-测试 1：运行上面的代码
-结果：__新建 study.db 文件，打印出3个用户和6条待办_______
+📝 **测试 1.1**：运行上面的代码，观察输出结果。
 
-测试 2：再运行一次（重复插入相同的用户名会怎样？）
-结果：_____SQLite: UNIQUE constraint failed: users.username__________
+📝 **测试 1.2**：再运行一次（重复插入相同的用户名会怎样？）
 
-问题 1.1：为什么 INSERT 用 `?` 占位符而不是 f-string？
-你的答案：_____防 SQL 注入攻击，? 让 sqlite3 自动处理转义__________
+❓ **问题 1.1**：为什么 INSERT 用 `?` 占位符而不是 f-string？
 
-问题 1.2：completed 字段为什么用 INTEGER（0/1）而不是 TEXT（'已完成'/'未完成'）？
-你的答案：_____节省空间，查询过滤时 completed=1 比 completed='已完成' 快_执行效率高_______
+❓ **问题 1.2**：completed 字段为什么用 INTEGER（0/1）而不是 TEXT（'已完成'/'未完成'）？
 """
-
-# ==================== 参考答案 ====================
-# 测试 1：输出 3 条用户记录 + 6 条待办记录
-# 测试 2：报错 SQLite: UNIQUE constraint failed: users.username（因为 UNIQUE 约束）
-# 1.1：防止 SQL 注入攻击。如果用 f-string，恶意用户可以输入 '"; DROP TABLE users;--' 来删库
-# 1.2：INTEGER 占用字节少，比较操作快（数字比较 vs 字符串比较），且兼容 JOIN/聚合函数
 
 
 # ============================================================
@@ -160,29 +151,18 @@ for row in cursor.fetchall():
 conn.close()
 ```
 
-测试 2.1：completed = 1 的有几条？
-结果：____背单词、交房租 共2条_______
+📝 **测试 2.1**：completed = 1 的有几条？分别是什么？
 
-测试 2.2：user_id = 2（lisi）的待办是什么？
-结果：__写周报、背单词_________
+📝 **测试 2.2**：user_id = 2（lisi）的待办有哪些？
 
-测试 2.3：LIKE '%学%' 匹配了哪些？
-结果：____学习SQL、背单词__________
+📝 **测试 2.3**：LIKE '%学%' 匹配了哪些待办？
 
-测试 2.4：第2页第2条是什么？
-结果：__写周报 （排序后第3-4条是第2页）_____________
+📝 **测试 2.4**：第2页第2条是什么？
 
-问题 2.1：LIMIT 和 OFFSET 的顺序能调换吗？为什么？
-你的答案：___不行，SQL语法固定顺序先LIMIT后OFFSET，LIMIT控制取多少条，OFFSET控制跳过多少条______
+❓ **问题 2.1**：LIMIT 和 OFFSET 的顺序能调换吗？为什么？
 
-问题 2.2：ORDER BY 不指定的话，结果的顺序是固定的吗？
-你的答案：___不一定，取决于底层存储的物理顺序，可能每次查询结果不一样。生产环境一定要显式指定ORDER BY______
+❓ **问题 2.2**：ORDER BY 不指定的话，结果的顺序是固定的吗？
 """
-
-# ==================== 参考答案 ====================
-# 2.1：可以写成 SELECT ... ORDER BY column LIMIT X OFFSET Y 或反过来但SQL标准是 ORDER BY -> LIMIT -> OFFSET
-#      SQLite允许互换位置但不推荐，遵循SQL标准写法
-# 2.2：ORDER BY 不指定时，结果是引擎决定的物理顺序（通常是insert顺序），但不保证稳定
 
 
 # ============================================================
@@ -231,26 +211,21 @@ conn.commit()
 conn.close()
 ```
 
-测试 3.1：UPDATE 后 affected rows 是多少？
-结果：__1_______
+📝 **测试 3.1**：UPDATE 后 affected rows 是多少？
 
-测试 3.2：如果 WHERE 条件是 title = '学'（模糊匹配）呢？
-结果：___UPDATE 会把所有title包含"学"的行都改了！可能是"学习SQL"、"背单词"...太危险____
+📝 **测试 3.2**：如果 WHERE 条件是 title = '学'（模糊匹配）呢？会发生什么？
 
-测试 3.3：DELETE 后还能恢复吗？
-结果：___不能直接恢复。SQLite没有撤销命令。所以DELETE前先用SELECT看看要删哪些！！！______
+📝 **测试 3.3**：DELETE 后还能恢复吗？
 
 💡 **破坏性实验**（千万别在真实项目上试）：
 把 UPDATE todos SET completed = 1 WHERE title = '买牛奶' 里的 WHERE 去掉：
+```sql
 UPDATE todos SET completed = 1;
-会发生什么？所有待办都被标为已完成！！！这就是忘记写 WHERE 的后果。
+```
+会发生什么？想一想，然后再自己试试看。
 
-问题 3.1：如何批量把所有"学习"分类的待办改为已完成？
-你的答案：___UPDATE todos SET completed = 1 WHERE category = '学习';______
+❓ **问题 3.1**：如何批量把所有"学习"分类的待办改为已完成？
 """
-
-# ==================== 参考答案 ====================
-# 3.1：UPDATE todos SET completed = 1 WHERE category = '学习'
 
 
 # ============================================================
@@ -309,24 +284,14 @@ for row in cursor.fetchall():
 conn.close()
 ```
 
-测试 INNER JOIN：
-  wangwu 出现在结果里吗？___不会，因为他没有待办数据，INNER JOIN只保留两边都有的__________
+📝 **测试 4.1**：INNER JOIN 结果中 wangwu 出现了吗？为什么？
 
-测试 LEFT JOIN：
-  wangwu 出现在结果里吗？___会，左边显示用户名，右边显示"(暂无待办)"______________________
+📝 **测试 4.2**：LEFT JOIN 结果中 wangwu 出现了吗？右边填了什么？
 
-问题 4.1：什么时候该用 INNER JOIN，什么时候该用 LEFT JOIN？
-你的答案：___想只看有数据的用INNER JOIN；想看所有人（包括没数据的）用LEFT JOIN__________
+❓ **问题 4.1**：什么时候该用 INNER JOIN，什么时候该用 LEFT JOIN？
 
-问题 4.2：SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) 这个写法什么意思？
-你的答案：___条件聚合——如果completed=1就计1分，否则计0，最后加起来就是完成的数量__________
+❓ **问题 4.2**：`SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END)` 这个写法什么意思？试着用 Python 代码翻译一遍。
 """
-
-# ==================== 参考答案 ====================
-# INNER JOIN：只显示两张表都有匹配的数据（去掉了无待办的用户）
-# LEFT JOIN：保留左表所有行（包括了无待办的wangwu）
-# 4.1：要看关联关系内部用INNER JOIN，要看完整集合包括空值用LEFT JOIN
-# 4.2：这是SQL里的条件求和，相当于Python的 sum(1 if todo.completed else 0 for todo in todos)
 
 
 # ============================================================
@@ -347,7 +312,6 @@ cursor = conn.cursor()
 cursor.execute("SELECT COUNT(*) FROM todos")
 total = cursor.fetchone()[0]
 print(f"总待办数：{total}")
-# 结果：____6_______
 
 # --- 按分类统计 ---
 cursor.execute("""
@@ -358,12 +322,7 @@ cursor.execute("""
 """)
 print("\n=== 各分类待办数量 ===")
 for row in cursor.fetchall():
-    print(f"  {row['category']}：{row['cnt']}条")
-# 预期输出：
-#   学习：2条
-#   生活：2条
-#   工作：1条
-#   健康：1条
+    print(f"  {row[0]}：{row[1]}条")
 
 # --- 按用户统计 ---
 cursor.execute("""
@@ -374,9 +333,7 @@ cursor.execute("""
 """)
 print("\n=== 每人待办数 ===")
 for row in cursor.fetchall():
-    print(f"  {row['username']}：{row['count']}条")
-# zhangsan 有2条，lisi有2条，wangwu有2条...
-# 等等，我们刚才删了一条（健身），现在分别是 2, 2, 1
+    print(f"  {row[0]}：{row[1]}条")
 
 # --- MAX 和 MIN ---
 cursor.execute("SELECT MIN(id), MAX(id) FROM todos")
@@ -386,17 +343,10 @@ print(f"\nID范围：{min_id} ~ {max_id}")
 conn.close()
 ```
 
-问题 5.1：GROUP BY 后面能不能跟一个非聚合列？比如 SELECT category, title FROM todos GROUP BY category？
-你的答案：___不行，SELECT只能放GROUP BY的列或者聚合函数。加了title之后每条记录的title都不一样就没法分组了_________
+❓ **问题 5.1**：GROUP BY 后面能不能跟一个非聚合列？比如 `SELECT category, title FROM todos GROUP BY category`？为什么？
 
-问题 5.2：HAVING 和 WHERE 有什么区别？
-你的答案：___WHERE在分组前过滤行，HAVING在分组后过滤组。WHERE不能直接用聚合函数如COUNT()，HAVING可以_________
+❓ **问题 5.2**：HAVING 和 WHERE 有什么区别？
 """
-
-# ==================== 参考答案 ====================
-# 5.1：不行，这会报SQL错误。每个分组选哪个title？不确定。
-# 5.2：WHERE 过滤原始行（GROUP BY之前），HAVING 过滤分组后的结果（GROUP BY之后）
-#     例如：WHERE completed=0 筛选出未完成的行，HAVING COUNT(*)>1 筛选出待办多于1条的用户
 
 
 # ============================================================
@@ -410,13 +360,79 @@ conn.close()
 # 2. LeetCode 196 - 删除重复的电子邮箱（简单SQL思维题）
 #    链接：https://leetcode.cn/problems/delete-duplicate-emails/
 #    思路提示：自连接（self-join）+ DELETE，对应今天学的 DELETE + JOIN 概念
+# ============================================================
+
+
+# ============================================================
+# 💡 参考答案（完成所有练习后再看！）
+# ============================================================
 #
-# 💡 继续练习字符串处理技巧
-# ============================================================
+# 使用说明：先独立做完上面所有【测试】和【问题】，再打开这里对照。
+# 如果你的答案思路接近就算对，不必文字完全一致。
+# ------------------------------------------------------------
+
+"""
+== 实验 1 参考答案 ==
+
+测试 1.1：输出了 3 个用户记录 + 6 条待办记录。
+测试 1.2：报错 —— SQLite: UNIQUE constraint failed: users.username（因为 UNIQUE 约束阻止重复插入）。
+
+问题 1.1：防止 SQL 注入攻击。如果用 f-string，恶意用户可以输入 '"'; DROP TABLE users;--' 来删库。
+         用 ? 占位符让 sqlite3 自动处理转义，SQL 注入语句只会当作普通字符串存入，不会执行。
+问题 1.2：①节省空间，数字比较比字符串比较快；②JOIN/聚合时用数字更方便；
+         ③SQLite 中 BOOLEAN 本身就是存为 0/1。
+
+== 实验 2 参考答案 ==
+
+测试 2.1：2 条 —— 背单词、交房租。
+测试 2.2：写周报、背单词。
+测试 2.3：学习SQL（category=学习）、背单词（category=学习）。
+测试 2.4：写周报（排序后第3条，即第2页第2条）。
+
+问题 2.1：SQL 标准执行顺序是 ORDER BY -> LIMIT -> OFFSET。SQLite 允许互换位置但不推荐。
+         正确的语义：先排好序，取前 N 条，跳过 M 条。写成标准顺序不容易出错。
+问题 2.2：不一定。ORDER BY 不指定时，结果是引擎决定的物理顺序（通常是 insert 顺序），但不保证稳定。
+         生产环境一定要显式指定 ORDER BY。
+
+== 实验 3 参考答案 ==
+
+测试 3.1：1 行（只有"买牛奶"这一条被更新）。
+测试 3.2：WHERE title = '学' 只会精确匹配 title 完全等于"学"的行。但如果改成 LIKE '%学%' 就会匹配所有含"学"的行——太危险！
+         这说明了 WHERE 条件要写精确的重要性。
+测试 3.3：不能直接恢复。SQLite 没有撤销命令。所以 DELETE 前先用 SELECT 看看要删哪些！！！
+
+问题 3.1：UPDATE todos SET completed = 1 WHERE category = '学习';
+
+== 实验 4 参考答案 ==
+
+测试 4.1：没有出现。wangwu 没有任何待办数据，INNER JOIN 只保留两张表都有匹配的行。
+测试 4.2：出现了。用户名正常显示，右边填了 "(暂无待办)"（即 title = NULL 时被替代了）。
+
+问题 4.1：想只看有关联数据的用 INNER JOIN；想看完整名单（包括没数据的）用 LEFT JOIN。
+         例如："查出所有有待办的用户"用 INNER JOIN；"查每个用户的待办情况（含零待办用户）"用 LEFT JOIN。
+问题 4.2：这是 SQL 的条件求和。相当于 Python 的：
+         sum(1 if todo.completed else 0 for todo in todos)
+         CASE WHEN completed=1 THEN 1 ELSE 0 END → 每条记录判断
+         SUM(...) → 加起来就是完成的数量
+
+== 实验 5 参考答案 ==
+
+问题 5.1：不行。这会报 SQL 错误。每个分组里选哪个 title？数据库不确定。
+         SELECT 只能放 GROUP BY 的列或聚合函数。
+问题 5.2：WHERE 过滤的是原始行（分组前），HAVING 过滤的是分组后的结果（分组后）。
+         WHERE 不能用聚合函数，HAVING 可以。
+         例如：WHERE completed=0 筛选出未完成的行；HAVING COUNT(*)>1 筛选出待办多于1条的用户。
+
+== LeetCode 思路 ==
+
+LC 58：用 rstrip().split() 或正则 \b\w+$ 找到最后一个单词然后算长度。
+LC 196：用自连接 DELETE，选出 id 较大的那条删除：
+   DELETE p1 FROM Persons p1, Persons p2 WHERE p1.email = p2.email AND p1.id > p2.id
+"""
 
 
 # ============================================================
-# 学习记录
+# 📝 今日学习记录
 # ============================================================
 """
 📝 Day 29 学习打卡

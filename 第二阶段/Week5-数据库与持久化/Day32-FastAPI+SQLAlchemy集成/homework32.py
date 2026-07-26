@@ -6,6 +6,7 @@ Day 32 练习题：FastAPI + SQLAlchemy 集成 — 依赖注入与数据库会�
     pip install fastapi uvicorn sqlalchemy
 
 💡 建议：所有实验写在 main.py 中，逐个添加测试通过后再继续。
+完成每一个「测试」和「问题」后再翻到文件末尾的参考答案。
 """
 
 # ============================================================
@@ -85,28 +86,18 @@ def health_check():                                     # ← 这个不需要 db
     return {"status": "ok"}
 ```
 
-测试 1.1：启动服务 `uvicorn main:app --reload`，访问 http://localhost:8000/docs
-结果：___看到 Swagger UI 文档页面，/todos 和 /health 两个接口都在列表中___________
+📝 **测试 1.1**：启动服务 `uvicorn main:app --reload`，访问 http://localhost:8000/docs
+      观察有什么接口？能正常使用吗？
 
-测试 1.2：先 POST 创建一个待办 `{\"title\": \"学习 FastAPI\", \"description\": \"Day32\"}`
-结果：____返回 {\"id\":1,\"title\":\"学习 FastAPI\",\"description\":\"Day32\",\"completed\":false} _______
+📝 **测试 1.2**：先 POST 创建一个待办 `{"title": "学习 FastAPI", "description": "Day32"}`
+      返回了什么？状态码是多少？
 
-测试 1.3：再 GET 查看列表
-结果：___[{"id":1,"title":"学习 FastAPI","description":"Day32","completed":false}]_________
+📝 **测试 1.3**：再 GET 查看列表，能看到刚才创建的条目吗？
 
-问题 1.1：如果没有 yield，只是 return db，然后手动 db.close() 会有什么问题？
-你的答案：___如果路由中间报错了，db.close() 永远不会被执行，连接泄漏。yield + finally 保证无论正常还是异常都会执行清理________________
+❓ **问题 1.1**：如果没有 yield，只是 return db，然后手动 db.close() 会有什么问题？
 
-问题 1.2：为什么 /health 不需要写 db: Session = Depends(get_db)？
-你的答案：___因为它不操作数据库，不需要 Session。Depends() 按需使用，不用的时候不加_________
+❓ **问题 1.2**：为什么 /health 不需要写 `db: Session = Depends(get_db)`？
 """
-
-# ==================== 参考答案 ====================
-# 实验 1 验证要点：
-# 1. get_db() 用 yield 而不是 return —— yield 前创建 Session 交给路由用，yield 后 finally 里 close()
-# 2. 路由函数中 db: Session = Depends(get_db) 是语法糖——FastAPI 自动调用 get_db()，把 yield 出来的 db 传进来
-# 3. 不需要 db 的路由（如健康检查）可以不加 Depends，保持干净
-# 4. visit http://localhost:8000/docs 可交互式调试 API
 
 
 # ============================================================
@@ -160,48 +151,40 @@ def delete_todo(todo_id: int, db: Session = Depends(get_db)):
 ```
 
 ---
-测试用例（按顺序执行）：
+📝 **测试用例**（按顺序执行）：
 
-Step A：POST /todos → {\"title\": \"买牛奶\", \"description\": \"早上的事\"}
-预期：201 Created，返回 {\"id\":1,\"title\":\"买牛奶\",\"description\":\"早上的事\",\"completed\":false}
+Step A：POST /todos → `{"title": "买牛奶", "description": "早上的事"}`
+预期：______（自己试完后填写）______
 
-Step B：POST /todos → {\"title\": \"写周报\", \"description\": null}
-预期：201 Created，返回 {\"id\":2,\"title\":\"写周报\",\"description\":null,\"completed\":false}
+Step B：POST /todos → `{"title": "写周报", "description": null}`
+预期：______（自己试完后填写）______
 
 Step C：GET /todos
-预期：[{...id:1...}, {...id:2...}] 两条记录
+预期：______（自己试完后填写）______
 
 Step D：GET /todos/999
-预期：404 Not Found，返回 {\"detail\":\"待办不存在\"}
+预期：______（自己试完后填写）______
 
-Step E：PUT /todos/1 → {\"title\": \"买全脂牛奶\", \"description\": \"早点去\"}
-预期：200 OK，返回更新后的完整对象
+Step E：PUT /todos/1 → `{"title": "买全脂牛奶", "description": "早点去"}`
+预期：______（自己试完后填写）______
 
-Step F：PATCH /todos/2 → {\"completed\": true}
-预期：200 OK，只改了 completed，title 和 description 不变
+Step F：PATCH /todos/2 → `{"completed": true}`
+预期：______（自己试完后填写）______
 
 Step G：DELETE /todos/2
-预期：204 No Content（没有 body）
+预期：______（自己试完后填写）______
 
 Step H：GET /todos
-预期：只剩 1 条（买全脂牛奶）
+预期：______（自己试完后填写）______
 
 ---
 
-问题 2.1：PUT 和 PATCH 的区别是什么？各适合什么场景？
-你的答案：___PUT 是全量替换——要传完整对象（即使很多字段没变）。PATCH 是部分更新——只传要改的字段（exclude_unset=True 排除没传的）____________
+❓ **问题 2.1**：PUT 和 PATCH 的区别是什么？各适合什么场景？
 
-问题 2.2：为什么 DELETE 返回 204 而不是 200？
-你的答案：___204 No Content 表示操作成功但没有响应体。DELETE 成功后通常不需要返回数据，语义更准确_________
+❓ **问题 2.2**：为什么 DELETE 返回 204 而不是 200？
 
-问题 2.3：patch_todo 里的 exclude_unset=True 有什么用？
-你的答案：___Pydantic 默认所有字段都有值（Optional 的默认值是 None），exclude_unset=True 只保留客户端真正传入的字段，这样就不会把未传的字段覆盖成 None_________
+❓ **问题 2.3**：patch_todo 里的 `exclude_unset=True` 有什么用？
 """
-
-# ==================== 参考答案 ====================
-# 2.1：PUT 全量更新，适合客户端有完整数据的场景；PATCH 部分更新，适合表单编辑等只需改几个字段的场景
-# 2.2：RESTful 规范中 DELETE 成功返回 204 且无 body，语义更清晰
-# 2.3：model_dump(exclude_unset=True) 过滤掉客户端没传的字段，避免把这些字段更新为 None 覆盖原有数据
 
 
 # ============================================================
@@ -259,46 +242,38 @@ def todo_stats_summary(db: Session = Depends(get_db)):
 ```
 
 ---
-测试用例：
+📝 **测试用例**：
 
 Step A：先插入 5 条数据：
-  - POST: {"title": "学习 Python", "category": "学习"} → id:1
-  - POST: {"title": "学习 SQL", "category": "学习"} → id:2
-  - POST: {"title": "买牛奶", "category": "生活"} → id:3
-  - POST: {"title": "写周报", "category": "工作", "completed": true} → id:4
-  - POST: {"title": "健身", "category": "健康"} → id:5
+  - POST: `{"title": "学习 Python", "category": "学习"}`
+  - POST: `{"title": "学习 SQL", "category": "学习"}`
+  - POST: `{"title": "买牛奶", "category": "生活"}`
+  - POST: `{"title": "写周报", "category": "工作", "completed": true}`
+  - POST: `{"title": "健身", "category": "健康"}`
 
 Step B：GET /todos/search?keyword=学习
-预期：返回 id:1 和 id:2（标题包含"学习"）
+预期：______（自己试完后填写）______
 
 Step C：GET /todos/search?completed=true
-预期：只返回 id:4
+预期：______（自己试完后填写）______
 
 Step D：GET /todos/search?skip=1&limit=2
-预期：返回第 2-3 条（跳过第 1 条，取 2 条）
+预期：______（自己试完后填写）______
 
 Step E：GET /todos/stats/categories
-预期：{"学习": 2, "生活": 1, "工作": 1, "健康": 1}
+预期：______（自己试完后填写）______
 
 Step F：GET /todos/stats/summary
-预期：{"total": 5, "done": 1, "pending": 4}
+预期：______（自己试完后填写）______
 
 ---
 
-问题 3.1：search_todos 里为什么要先用 `query = db.query(Todo)` 再链式加 filter？
-你的答案：___动态拼接查询条件。keyword/category/completed 都是可选的，哪个有值就加哪个 filter，没有就不加，比写一堆 if-else 分别调不同的查询清爽_________
+❓ **问题 3.1**：search_todos 里为什么要先用 `query = db.query(Todo)` 再链式加 filter？
 
-问题 3.2：func.count(Todo.id) 和 len(todos) 有什么区别？
-你的答案：___func.count 是在数据库层面做的 COUNT(*)，只返回一个数字（快）；len(todos) 是先查出所有数据到内存再数个数（慢，还浪费带宽）_________
+❓ **问题 3.2**：`func.count(Todo.id)` 和 `len(todos)` 有什么区别？
 
-问题 3.3：offset 和 limit 的顺序能换吗？
-你的答案：___SQLAlchemy 的 .offset().limit() 或 .limit().offset() 链式调用顺序不影响最终 SQL，但按照阅读习惯先 offset 再 limit 更自然。生成的 SQL 永远是 LIMIT ? OFFSET ?_________
+❓ **问题 3.3**：offset 和 limit 的顺序能换吗？
 """
-
-# ==================== 参考答案 ====================
-# 3.1：动态构建查询——用一个 Query 对象逐步叠加 filter，最后一次执行 .all()
-# 3.2：数据库端聚合 vs 应用端计数，大数据量时性能差距巨大
-# 3.3：SQLAlchemy 内部会正确排序生成 LIMIT/OFFSET，但推荐 offset().limit() 写法更直观
 
 
 # ============================================================
@@ -348,7 +323,7 @@ item2 = Item(name=None)                       # name 不允许为 NULL（模拟�
 db.add(item2)
 
 try:
-    db.commit()                               # ← 这里会报错（NOT NULL constraint failed）
+    db.commit()                               # ← 这里会报错
 except Exception as e:
     print(f"出错了：{e}")
     db.rollback()                              # ← 关键！回滚撤销刚才的操作
@@ -357,7 +332,7 @@ except Exception as e:
 # 验证——看看数据库里有没有刚才的东西
 db2 = SessionLocal()
 remaining = db2.query(Item).all()
-print(f"数据库剩余记录数：{len(remaining)}")      # ← 应该是 0
+print(f"数据库剩余记录数：{len(remaining)}")
 db2.close()
 
 # ===== 场景 3：flush 但不 commit =====
@@ -367,49 +342,30 @@ db = SessionLocal()
 item3 = Item(name="橘子")
 db.add(item3)
 db.flush()                                     # ← 写入当前事务但不持久化
-# 此时如果在同一个 session 里查，能看到 item3
 can_see = db.query(Item).count()
-print(f"flush 后可见记录数：{can_see}")          # ← 是 1
+print(f"flush 后可见记录数：{can_see}")
 db.rollback()                                  # ← 撤销
-# 再查就没有了
 after_rollback = db.query(Item).count()
-print(f"rollback 后可见记录数：{after_rollback}") # ← 回到 0
+print(f"rollback 后可见记录数：{after_rollback}")
 db.close()
 ```
 
-运行 `python test_rollback.py`，观察输出。
+运行 `python test_rollback.py`，观察输出并回答：
 
----
+📝 **测试结果**：
 
-测试结果：
+场景 1 后有几条记录？场景 2 rollback 后呢？
+答：______________________________________________________________
 
-场景 1 后数据库里有几条记录？
-结果：____0条（因为场景2的 rollback 把场景1也回滚了——等等不对！场景1已经 db.close() 了______）
-修正：场景1有1条（苹果），场景2 rollback 不会影响场景1因为已经关闭了连接
+实验 2 的关键发现（rollback 到底撤销了什么）：
+答：______________________________________________________________
 
-更正测试过程——让场景1和场景2在同一个 session 里：
-修改场景1不关 db，接着做场景2：
-结果：___commit 后立即 close 了，所以场景1的数据还在数据库里。场景2的 rollback 不影响场景1的数据________
+❓ **问题 4.1**：如果不在 except 里写 rollback，会发生什么？
 
-实验 2 的关键发现：
-结果：___db.rollback() 会把当前事务内所有未 commit 的操作全部撤销。这是防止脏数据的关键机制_________
+❓ **问题 4.2**：什么时候用 flush，什么时候用 commit？
 
-问题 4.1：如果不在 except 里写 rollback，会发生什么？
-你的答案：___Session 会一直处于错误状态，后续任何操作都会报错。必须 rollback 才能恢复 Session 的正常使用_________
-
-问题 4.2：什么时候用 flush，什么时候用 commit？
-你的答案：___flush 用于需要拿到自增 ID 但还没准备好持久化的场景（比如插完父记录立刻要拿 ID 插子记录）；commit 是真正的持久化操作，一般在业务逻辑完成后统一 commit_________
-
-问题 4.3：echo=True 的作用是什么？调试时有什么用？
-你的答案：___打印每条执行的 SQL 语句。调试时可以看清楚 SQLAlchemy 实际生成了什么 SQL，方便排查问题_________
+❓ **问题 4.3**：`echo=True` 的作用是什么？调试时有什么用？
 """
-
-# ==================== 参考答案 ====================
-# 实验 4 核心要点：
-# 1. commit() 失败后必须立即 rollback()，否则 Session 进入"中毒"状态不能再用
-# 2. flush() 只是同步到当前事务，rollback() 可以撤销；commit() 之后再 rollback 就没用了
-# 3. 生产环境中应该在每个写操作外面套 try/except/rollback
-# 4. echo=True 是调试利器，可以看到 SQLAlchemy 翻译成的原始 SQL
 
 
 # ============================================================
@@ -468,7 +424,7 @@ db3.commit()                             # 再 commit 持久化
 elapsed3 = time.perf_counter() - start
 print(f"方法3（add_all + flush + commit）：{elapsed3:.3f}秒")
 
-print(f"\\n🏆 最慢的是方法1，快了约 {elapsed1/elapsed2:.1f} 倍")
+print(f"\\n最慢的是方法1，快了约 {elapsed1/elapsed2:.1f} 倍")
 db1.close()
 db2.close()
 db3.close()
@@ -479,29 +435,17 @@ db3.close()
   方法2（add_all + 一次commit）：0.012秒
   方法3（add_all + flush + commit）：0.010秒
 
----
+📝 **测试结果**：
 
-测试结果：
+你的电脑上三种方法的耗时分别是多少？最慢的是哪种？
+答：______________________________________________________________
 
-1000 条数据下，三种方法的耗时分别是多少？
-结果：____方法1最慢（逐条commit开销大），方法2和方法3都快（一次commit），方法3略快于方法2_________
+❓ **问题 5.1**：为什么逐条 commit 这么慢？
 
-问题 5.1：为什么逐条 commit 这么慢？
-你的答案：___每次 commit 都要和数据库进行网络往返（即使是本地也要写磁盘），1000次 = 1000次 I/O 开销。改成一次 commit 就把 1000 次 I/O 减少到 1 次_________
+❓ **问题 5.2**：在实际 API 中，如果客户端要批量创建 100 个待办，你会怎么写？
 
-问题 5.2：在实际 API 中，如果客户端要批量创建 100 个待办，你会怎么写？
-你的答案：___接收 List[TodoCreate] 列表，然后用 db.add_all(items)，最后一次 commit。可以在 Service 层做事务包装，失败时整体 rollback_________
-
-问题 5.3：add_all 和多次 add 有什么本质区别？
-你的答案：___从 ORM 角度看效果一样——都是把对象放入 Session 缓冲区。关键区别在于 commit 的次数！add_all 后跟一次 commit 就是批量插入的优势所在_________
+❓ **问题 5.3**：add_all 和多次 add 有什么本质区别？
 """
-
-# ==================== 参考答案 ====================
-# 实验 5 核心结论：
-# 1. 永远不要在循环里 commit！把所有操作攒到一起，最后一次 commit
-# 2. 批量插入性能提升通常是几十倍甚至上百倍
-# 3. 生产环境大批量导入可以用 session.bulk_save_objects() 更快（但失去了一些 ORM 功能）
-# 4. API 设计：POST /todos/batch 接受数组，服务端做 add_all + 一次 commit
 
 
 # ============================================================
@@ -513,6 +457,75 @@ db3.close()
 #
 # 💡 数据库操作的本质是在已有数据集上做增删改查——LeetCode 的数组操作就是内存中的数据库
 # ============================================================
+
+
+# ============================================================
+# 💡 参考答案（完成所有练习后再看！）
+# ============================================================
+# 🔑 使用说明：先独立做完上面所有【测试】和【问题】，再打开这里对照。
+# 如果你的答案思路接近就算对，不必文字完全一致。
+# ------------------------------------------------------------
+
+"""
+== 实验 1 参考答案 ==
+
+实验 1 验证要点：
+1. get_db() 用 yield 而不是 return —— yield 前创建 Session 交给路由用，yield 后 finally 里 close()
+2. 路由函数中 `db: Session = Depends(get_db)` 是语法糖——FastAPI 自动调用 get_db()，把 yield 出来的 db 传进来
+3. 不需要 db 的路由（如健康检查）可以不加 Depends，保持干净
+4. visit http://localhost:8000/docs 可交互式调试 API
+
+问题 1.1：如果路由中间报错了，db.close() 永远不会被执行，连接泄漏。yield + finally 保证无论正常还是异常都会执行清理。
+问题 1.2：因为它不操作数据库，不需要 Session。Depends() 按需使用，不用的时候不加。
+
+
+== 实验 2 参考答案 ==
+
+问题 2.1：PUT 是全量替换——要传完整对象（即使很多字段没变）。PATCH 是部分更新——只传要改的字段（exclude_unset=True 排除没传的）。
+      PUT 适合客户端有完整数据的场景；PATCH 适合表单编辑等只需改几个字段的场景。
+问题 2.2：RESTful 规范中 DELETE 成功返回 204 且无 body，语义更清晰。
+      204 No Content 表示操作成功但没有响应体。
+问题 2.3：model_dump(exclude_unset=True) 过滤掉客户端没传的字段，避免把这些字段更新为 None 覆盖原有数据。
+      Pydantic 默认所有 Optional 字段都有值（None），不加 exclude_unset 会把没传的字段也更新掉。
+
+
+== 实验 3 参考答案 ==
+
+问题 3.1：动态构建查询——用一个 Query 对象逐步叠加 filter，最后一次执行 .all()。
+      哪个条件有值就加哪个 filter，没有就不加，比写一堆 if-else 分别调不同的查询清爽。
+问题 3.2：func.count 是在数据库层面做的 COUNT(*)，只返回一个数字（快）；
+      len(todos) 是先查出所有数据到内存再数个数（慢，还浪费带宽）。
+      大数据量时性能差距巨大。
+问题 3.3：SQLAlchemy 内部会正确排序生成 LIMIT/OFFSET，但推荐 offset().limit() 写法更直观。
+
+
+== 实验 4 参考答案 ==
+
+测试结果：
+场景 1：添加了 1 条记录（苹果），然后 close() 了连接。
+场景 2：新开启了一个 Session，插入香蕉和空名 Item。commit 失败 → rollback → 这个 Session 里没有任何数据。
+两个场景互相不影响（因为用了不同的 Session，场景 1 已经 commit + close）。
+
+问题 4.1：Session 会一直处于错误状态，后续任何操作都会报错。必须 rollback 才能恢复 Session 的正常使用。
+问题 4.2：flush 用于需要拿到自增 ID 但还没准备好持久化的场景（比如插完父记录立刻要拿 ID 插子记录）。
+      commit 是真正的持久化操作，一般在业务逻辑完成后统一 commit。
+问题 4.3：打印每条执行的 SQL 语句。调试时可以看清楚 SQLAlchemy 实际生成了什么 SQL，方便排查问题。
+
+
+== 实验 5 参考答案 ==
+
+核心结论：
+1. 永远不要在循环里 commit！把所有操作攒到一起，最后一次 commit。
+2. 批量插入性能提升通常是几十倍甚至上百倍。
+3. 生产环境大批量导入可以用 session.bulk_save_objects() 更快（但失去了一些 ORM 功能）。
+4. API 设计：POST /todos/batch 接受数组，服务端做 add_all + 一次 commit。
+
+问题 5.1：每次 commit 都要和数据库进行网络往返（即使是本地也要写磁盘），1000次 = 1000次 I/O 开销。
+      改成一次 commit 就把 1000 次 I/O 减少到 1 次。
+问题 5.2：接收 List[TodoCreate] 列表，然后用 db.add_all(items)，最后一次 commit。可以在 Service 层做事务包装，失败时整体 rollback。
+问题 5.3：从 ORM 角度看效果一样——都是把对象放入 Session 缓冲区。关键区别在于 commit 的次数！
+      add_all 后跟一次 commit 就是批量插入的优势所在。
+"""
 
 
 # ============================================================
