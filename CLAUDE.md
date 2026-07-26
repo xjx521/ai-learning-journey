@@ -69,11 +69,12 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 
 ## 学习进度
 
-当前阶段：第二阶段 | 当前进度：Day 27 已完成 | LeetCode：0题 | 最后更新：2026-07-24
+当前阶段：第二阶段 | 当前进度：Day 28 已完成 | LeetCode：0题 | 最后更新：2026-07-26
 
 ### 练习完成记录
 | 日期 | Day | 完成题数 | 掌握度 | 备注 |
 |------|-----|---------|--------|------|
+| 07-26 | Day28 | 5/5 | 良好 | 综合项目：待办事项API。Step1(FastAPI初始化+内存存储+健康检查)/Step2(CRUD五接口：POST创建201+GET列表+GET详情404+PUT全量更新+DELETE删除204)/Step3(搜索过滤keyword/category/completed+列表切片分页+PATCH部分更新exclude_unset)/Step4(JSON文件持久化load_todos/save_todos)/Step5(Counter统计categories+tags/summary文档)。修复Bug：date.today()转str用.isoformat()/completed过滤bool无.lower()/total.size→total/size除法/response_model与分页字典冲突删List[TodoResponse]/PATCH的todo_id漏写int类型注解/stats路由被{todo_id}拦截需移到前面/load_todos()的return[]缩进错误导致首次运行返回None |
 | 07-24 | Day27 | 6/6 | 良好 | FastAPI进阶：请求体Pydantic BaseModel(BookCreate)/Field验证规则(min_length/gt/le/ge+破坏性实验default=0不满足gt=0)/响应模型response_model过滤password字段/嵌套模型Address+CompanyCreate+列表字段/HTTPException 404错误处理+DELETE 204/混合参数(路径参数+查询参数+请求体)+exclude_unset=True。额外完成apps子项目：app03(Pydantic field_validator自定义验证+Addr嵌套+List类型)、app04(Form表单数据接收)。修复：main.py的price Field破坏性实验default=0未改回...(已修复)、GET路由/todo少写s(已修复)。注意：homework27问题2.1的gt/ge含义写反了(gt=大于不是小于)，需记住gt=greater than/ge=greater than or equal |
 | 07-23 | Day26 | 7/7 | 良好 | FastAPI入门7个实验全部完成：Hello World基础API/路径参数int类型验证+422错误观察/查询参数默认值+Optional/路径+查询混合参数/Enum枚举限制选项(asc/desc)/自定义状态码201+204/自动文档Swagger UI配置(title/description/tags/docstring)。额外完成：原始socket HTTP服务器(day26-http.py)、4种HTTP方法装饰器(@get/@post/@put/@delete)、路由分发模式(主app+子router)、请求响应子项目(路径参数优先级+Union/Optional查询参数)。遗留小问题：main.py里POST /users路由重复(实验6和7冲突)、user_id类型破坏性实验后未改回int、请求和响应/子项目缺__init__.py |
 | 07-22 | Day25 | 5/5 | 良好 | 异步编程基础：执行顺序预测(gather并发按完成时间排序)/同步vs异步耗时对比(sync 3.0s→async 1.0s,3倍提升)/异步爬虫模拟(5网站并发5.8s→2.0s,节省3.8s)/async常见错误找茬(3个:未await协程/普通函数用await/async里用time.sleep)/异步倒计时器(while循环+asyncio.sleep双并发)。核心修复：exercise_2加async def+调用处await+内部asyncio.run改await(不能嵌套事件循环)。掌握核心规则：一个程序只有一个asyncio.run()入口，内部用await |
@@ -106,3 +107,4 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 |------|------|------|------|
 | 第一阶段 Week2 | 命令行记账本 | ✅ 已完成 | 2026-07-11 完成，含JSON持久化+异常处理 |
 | 第一阶段 Week3 | 面向对象重构记账本 | ✅ 已完成 | 2026-07-17 完成，含Record/AccountBook类设计、JSON持久化、命令行交互 |
+| 第二阶段 Week4 | 待办事项API | ✅ 已完成 | 2026-07-26 完成，含CRUD+搜索分页+PATCH部分更新+JSON持久化+Counter统计 |
