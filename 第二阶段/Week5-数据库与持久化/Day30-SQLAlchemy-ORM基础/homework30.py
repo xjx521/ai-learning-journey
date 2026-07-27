@@ -11,9 +11,17 @@ Day 30 练习题：SQLAlchemy ORM 基础 — 模型定义、CRUD、关系映射
 """
 
 from datetime import datetime
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, DateTime, func
+from sqlalchemy import (
+    create_engine,
+    Column,
+    Integer,
+    String,
+    Boolean,
+    ForeignKey,
+    DateTime,
+    func,
+)
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, relationship
-
 
 # ============================================================
 # 【实验 1】定义 User + Todo 模型（一对多关系）
@@ -56,13 +64,18 @@ class Todo(Base):
 ```
 
 📝 **测试 1.1**：检查两个模型是否正确定义了字段——分别列出 User 和 Todo 的属性名。
-
+User:id,username,email,hashed_password Todo:id,title,description,category,completed,user_id
 📝 **测试 1.2**：运行 `Base.metadata.create_all(bind=engine)` 后生成了什么？
       用 sqlite3 命令行打开生成的 .db 文件，输入 `.schema` 看看实际建了什么表。
-
+实际建了todos和users表
 ❓ **问题 1.1**：`cascade="all, delete-orphan"` 的作用是什么？
-
+级联操作——"all" 表示对 User 做的所有操作（增、删、改）都自动级联到他的 Todos；
+"delete-orphan" 表示如果 User 被删了，他的所有 Todo 也一起被删（孤儿不允许存在）。
+如果不加这个，只删 User 不会动 Todo。
 ❓ **问题 1.2**：`back_populates` 需要两边都写吗？如果只在一边写会怎样？
+需要两边都写，才能建立双向关联。只在一边写的话：
+只能从 User 访问 Todo（`user.todos` 能拿到待办列表），
+但不能从 Todo 访问 User（`todo.owner` 会报错或返回 None）。
 """
 
 
@@ -131,16 +144,18 @@ db.close()
 ```
 
 📝 **测试 2.1**：插入 1 个用户 + 2 个待办，查询结果对吗？分别打印出数量。
-
+对 1个用户两个待办
 📝 **测试 2.2**：更新 todo1 的标题和 completed 后，再查一次得到的结果是什么？
-
+title变成复习 completed=ture
 📝 **测试 2.3**：删除 todo2 后，剩余的待办数是几？
-
+1条
 💡 **破坏性实验**：把 `db.commit()` 注释掉，然后再查——数据还在吗？为什么？
-
+不在 数据未提交到数据库只是保存到对话session里面
 ❓ **问题 2.1**：`db.refresh()` 什么时候必须用？
-
+获取自增id的时候
 ❓ **问题 2.2**：`db.get(Model, id)` 和 `db.query(Model).filter(Model.id == id).first()` 有什么区别？
+get() 直接用主键查，走缓存更快（类似 dict.get()）；
+filter 是通用查询，慢一些但功能更多（可以组合多个条件）
 """
 
 
@@ -220,16 +235,32 @@ db.close()
 ```
 
 📝 **测试 Q1**：zhangsan 有几条待办？列出标题。
-
+4条待办   ❌ 学习 Python
+  ✅ 学习 SQL
+  ❌ 学习 FastAPI
+  ✅ 买牛奶
 📝 **测试 Q4**：排序后的完整顺序是什么？
-
+=== 排序：已完成在前，同组内按标题字母序 ===
+  [生活] 买牛奶 (已完成)
+  [学习] 学习 SQL (已完成)
+  [工作] 写周报 (未完成)
+  [学习] 学习 FastAPI (未完成)
+  [学习] 学习 Python (未完成)
+  [学习] 背单词 (未完成)
 📝 **测试 Q5**：第1页第3条是什么？
-
+  学习 FastAPI
 📝 **测试 Q6**：LIKE '%学习%' 匹配了几条？分别是什么？
-
+三条搜索关键词'学习'：
+  学习 Python
+  学习 SQL
+  学习 FastAPI
 ❓ **问题 3.1**：`db.flush()` 和 `db.commit()` 的区别是什么？
-
+flush 把数据同步到当前事务的数据库中（能在同一个 session 中被立即查到），
+         但不真正提交到磁盘（其他数据库连接看不到）。
+         commit 才是真正持久化保存（其他连接也能看到，且不可 rollback）。
 ❓ **问题 3.2**：`order_by(Todo.completed.desc(), Todo.title.asc())` 这个写法是什么意思？
+先按 completed **倒序**(降序)排，True(已完成=1)排前面，False(未完成=0)排后面；
+同一组内再按 title **正序**(升序)排，A-Z 字母顺序。
 """
 
 
@@ -293,10 +324,14 @@ db.close()
 ```
 
 📝 **测试 4.1**：如果有 100 个用户，"方法1"总共执行几条 SQL？"方法2"呢？
-
+ 101条（1个查user100个查todo）
 ❓ **问题 4.1**：joinedload 生成的 SQL 和原生 JOIN 有什么关系？
+问题 4.1：都是 INNER JOIN（LEFT OUTER JOIN）。SQLAlchemy 帮你自动拼接 SQL 字符串，
+         你只需要告诉它"我要预加载哪些关系"。
 
 ❓ **问题 4.2**：relationship 默认是 lazy loading 还是 eager loading？
+问题 4.2：lazy loading（懒加载）。访问 user.todos 时才去查数据库。
+         joinedload 把它改成 eager loading（预加载），一次性取回所有关联数据
 """
 
 
@@ -344,16 +379,19 @@ db.close()
 ```
 
 📝 **测试 5.1**：删除 test_user 后，待办还剩几条？你是怎么解释这个结果的？
-
+0条 建立数据库是设置了cascade="all, delete-orphan删除用户的时候也会删除他的待办
 💡 **破坏性实验 1**：
 把 `cascade="all, delete-orphan"` 去掉（或改为空字符串），再试一次删除用户，观察区别。
-
+这样的话就只删除了用户没有删除代办还剩余两条
 💡 **破坏性实验 2**：
 把外键 `ForeignKey("users.id")` 加上 `ondelete="RESTRICT"`（SQLite 不支持 ON DELETE，改用 Python 逻辑），删除用户时会发生什么？
-
+会报错
 ❓ **问题 5.1**：如果不想级联删除（删除父记录时子记录保留），应该怎么设置？
-
+把 `cascade="all, delete-orphan"` 去掉
 ❓ **问题 5.2**：`ondelete="SET NULL"` 有什么用？
+删除父记录时把子记录的 FK 字段设为 NULL（软断开关系）。
+         例如删除用户后，该用户的待办依然存在但 user_id 变为 NULL，归属不明。
+         前提是 user_id 允许为 NULL（nullable=True）。
 """
 
 
