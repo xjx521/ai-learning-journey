@@ -2,7 +2,7 @@ from datetime import datetime
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import INTEGER, DateTime, Float, String, func
+from sqlalchemy import INTEGER, DateTime, Float, String, func, select
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
@@ -79,12 +79,89 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
+# 依赖项
 async def get_db():
     async with AsyncSessionLocal() as session:  # 创建数据库会话seesion
-        yield session  # 把会话交给接口的db 跑完关闭
+        try:
+            yield session  # 把会话交给接口的db 跑完关闭
+        except Exception:
+            await session.rollback()  # 有异常回滚 保证数据一致
+            raise
 
 
-# 4.新增数据
+# 4.查询数据
+# 需求：查询功能接口 ->依赖注入：创建依赖项获取数据库会话+Depend注入路由函数
+@app.get("/book/books")
+async def get_book_list(db: AsyncSession = Depends(get_db)):
+    # 查询
+    result = await db.execute(select(Book))  # 查询 ->返回一个ORM对象
+    book = result.scalars().all()  # scalars().all()获取所有符合条件的
+    # book = result.scalars().first()  # 获取第一条
+    # book = await db.get(Book, 1)  # 获取单条数据，不需要select直接（模型类，主键）
+    return book
+
+
+# 需求：路径参数 书籍id
+@app.get("/book/get_book/{book_id}")
+async def get_book_id(book_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Book).where(Book.id == book_id))  # 条件查询
+    book = result.scalar_one_or_none()  # 获取数据返回一个或None
+    return book
+
+
+# 需求：条件 价格大于等于50
+@app.get("/book/get_bookprice")
+async def get_bookprice(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Book).where(Book.price >= 50))
+    books = result.scalars().all()
+    return books
+
+
+# 需求：作者以 谢 开头
+@app.get("/book/search_book")
+async def get_search_book(db: AsyncSession = Depends(get_db)):
+    # like()模糊搜索
+    # result = await db.execute(select(Book).where(Book.author.like("谢%")))  # 谢%：谢后面零个，一个，多个字符
+    # result = await db.execute(select(Book).where(Book.author.like("谢_")))  # 谢_：一个字符
+    # &:and |:or ~：非
+    # result = await db.execute(select(Book).where((Book.author.like("谢%")) & (Book.price > 100)))  # &:and |:or ~：非
+    # 需求：书籍id列表 如果数据库里的id在书籍列表里面，就返回
+    id_list = [1, 3, 5, 7, 9]
+    # .in_()包含
+    result = await db.execute(select(Book).where(Book.id.in_(id_list)))
+    book = result.scalars().all()
+    return book
+
+
+@app.get("/book/get_count")
+async def get_count(db: AsyncSession = Depends(get_db)):
+    # 聚合查询 select(func.方法名(模型类.属性))
+    # result = await db.execute(select(func.count(Book.id)))  # count统计有多少行
+    # result = await db.execute(select(func.max(Book.price)))  # max最大值 min最小值
+    # result = await db.execute(select(func.sum(Book.price)))  # sum求Book.price的和
+    result = await db.execute(select(func.avg(Book.price)))  # avg求Book.price的平均值
+    num = result.scalar()  # 提取一个数字->标量值
+    return num
+
+
+# 分页查询：select().offset().limit()
+
+
+@app.get("/book/get_book_page")
+async def get_book_page(
+    page: int = 1,  # 页码
+    page_size: int = 2,  # 一页多少数据
+    db: AsyncSession = Depends(get_db),
+):
+    # (页码-1)*每页数量
+    skip = (page - 1) * page_size
+    # offset:跳过的记录数 offset=(当前页码-1)*limit；limit返回的记录数（一页多少记录）
+    result = await db.execute(select(Book).offset(skip).limit(page_size))
+    books = result.scalars().all()
+    return books
+
+
+# 5.新增数据
 # 需求：用户输入图书信息(书名、作者、价格、出版社)
 # 用户输入-> 参数->请求体参数
 class BookBase(BaseModel):
@@ -108,7 +185,7 @@ async def add_book(
     return book
 
 
-# 5.更新数据
+# 6.更新数据
 # 需求：修改图书信息先查再改
 # 设计思路：路径参数查图书ID 先查找 ；请求体参数修改：作用是更新数据（书名、作者、价格、出版社）
 
@@ -137,7 +214,7 @@ async def update_book(
     return book
 
 
-# 删除数据
+# 7.删除数据
 @app.delete("/book/delete_book/{book_id}", status_code=204)
 async def delete_book(book_id: int, db: AsyncSession = Depends(get_db)):
     # 先查再删 提交
@@ -150,6 +227,8 @@ async def delete_book(book_id: int, db: AsyncSession = Depends(get_db)):
     await db.commit()
     return {"msg": "删除图书成功"}
 
+
+# 查询数据
 
 if __name__ == "__main__":
     uvicorn.run("day30-create:app", port=8080, reload=True)

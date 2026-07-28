@@ -9,7 +9,7 @@ Day 31 练习题：Alembic 数据库迁移 + 数据库设计
 完成每一个「测试」和「问题」后再翻到文件末尾的参考答案。
 """
 
-import os, sys, subprocess, shutil, json
+import os, sys, subprocess, shutil, json, sqlite3, time
 from pathlib import Path
 
 # ============================================================
@@ -67,10 +67,11 @@ sqlite3 exp1.db ".schema users"
 ```
 
 ❓ **问题 1.1**：为什么需要先写 models.py 再运行 `alembic revision`？
-
+要先有模型类确认数据库表里的内容才能进行迁移
 ❓ **问题 1.2**：`alembic init` 只能执行一次吗？重复执行会怎样？
-
+重复执行会报错：alembic已存在里面非空
 ❓ **问题 1.3**：env.py 里为什么要加 `sys.path.insert()`？不加会发生什么报错？
+会找不到文件ModuleNotFoundError: No module named 'models'。
 """
 
 
@@ -86,7 +87,7 @@ def run_experiment_1():
     exp_dir.mkdir()
 
     # --- 写入 models.py ---
-    (exp_dir / "models.py").write_text('''\
+    (exp_dir / "models.py").write_text("""\
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import DeclarativeBase
 
@@ -99,7 +100,7 @@ class User(Base):
     username = Column(String(50), unique=True, nullable=False)
     email = Column(String(100), nullable=True)
     is_active = Column(Boolean, default=True)
-''')
+""")
 
     # --- 执行 alembic init ---
     result = subprocess.run(
@@ -116,7 +117,7 @@ class User(Base):
     content = ini_path.read_text()
     content = content.replace(
         "sqlalchemy.url = driver://user:pass@localhost/dbname",
-        'sqlalchemy.url = sqlite:///./exp1.db',
+        "sqlalchemy.url = sqlite:///./exp1.db",
     )
     ini_path.write_text(content)
     print("已修改 alembic.ini 的 sqlalchemy.url")
@@ -126,23 +127,24 @@ class User(Base):
     code = env_path.read_text()
 
     # 添加 sys.path 和 models 导入
-    imports_section = '''
+    imports_section = """
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1]))
 from models import Base   # ← 导入你的 Base 类
-'''
-    code = code.replace('target_metadata = None',
-                        f'target_metadata = Base.metadata{imports_section}')
+"""
+    code = code.replace(
+        "target_metadata = None", f"target_metadata = Base.metadata{imports_section}"
+    )
 
     # 取消注释 connection 部分
     code = code.replace(
-        '# with connectable.connect() as connection:',
-        'with connectable.connect() as connection:',
+        "# with connectable.connect() as connection:",
+        "with connectable.connect() as connection:",
     )
     code = code.replace(
-        '        # context.run_migrations(connection)',
-        '        context.run_migrations(connection)',
+        "        # context.run_migrations(connection)",
+        "        context.run_migrations(connection)",
     )
     env_path.write_text(code)
     print("已修改 env.py（导入 Base + 取消注释 connection）")
@@ -223,12 +225,16 @@ sqlite3 exp1.db "PRAGMA table_info(users);"
 ```
 
 ❓ **问题 2.1**：第二次 autogenerate 生成的脚本内容是什么样的？和第一次有什么区别？
-
+upgrade 里面为pass 第一次有生成字段
+第二次生成的是 ALTER TABLE ... ADD COLUMN last_login 和 ADD COLUMN role。
+      而第一次是 CREATE TABLE users。ALTER 比 CREATE 简单多了，这就是增量迁移的优势。
 ❓ **问题 2.2**：如果我把已有的 username 字段的 String(50) 改成 String(100)，
          autogenerate 能自动检测到吗？生成的脚本会怎么写？
-
+能检测到变化，但SQLite不支持直接修改列类型，Alembic会生成复杂的"重建表"脚本：
+创建临时表→拷贝数据→删旧表→重命名临时表。这个过程容易出问题（数据类型不兼容等）。
 💡 **破坏性实验：** 把 models.py 中的 `is_active` 字段整个删掉，然后运行 autogenerate ——
 看看生成的 downgrade 函数做了什么（它是 DROP COLUMN 还是做不了？）。
+执行DropcCOLUMN 删除is_actice
 """
 
 
@@ -253,18 +259,24 @@ def run_experiment_2():
     # --- 第二步：修改 models.py，增加新字段 ---
     models = exp_dir / "models.py"
     new_models = models.read_text().replace(
-        'is_active = Column(Boolean, default=True)\n',
-        '''is_active = Column(Boolean, default=True)
+        "is_active = Column(Boolean, default=True)\n",
+        """is_active = Column(Boolean, default=True)
     last_login = Column(String(50), nullable=True)
     role = Column(String(20), default="user")
-''',
+""",
     )
     models.write_text(new_models)
     print("\n--- 修改了 models.py，添加了 last_login 和 role 字段 ---")
 
     # --- 第三步：生成迁移脚本 ---
     result = subprocess.run(
-        ["alembic", "revision", "--autogenerate", "-m", "add last_login and role columns"],
+        [
+            "alembic",
+            "revision",
+            "--autogenerate",
+            "-m",
+            "add last_login and role columns",
+        ],
         cwd=exp_dir,
         capture_output=True,
         text=True,
@@ -336,8 +348,11 @@ alembic upgrade head     # 重建所有表
 ```
 
 ❓ **问题 3.1**：downgrade -1 之后，这个版本的数据（刚插入的用户记录）还在吗？
-
+要分情况：如果只是 DROP COLUMN（删除某列），其他列的数据还在，但被删的那列数据丢失。
+如果是 DROP TABLE（downgrade base 回到最初），整张表和数据全没了。
 ❓ **问题 3.2**：如果数据库已经有很多生产数据了，downgrade 会有什么问题？
+如果 downgrade 删除了某列，那这列上的所有数据都会丢失且不可恢复。
+      所以生产环境一定要先备份数据库再做 downgrade，或者改用 ADD COLUMN（只增不改）的策略。
 
 💡 **破坏性实验：**
 ```bash
@@ -360,65 +375,86 @@ def run_experiment_3():
 
     # --- 先看当前状态 ---
     print("--- 当前迁移链 ---")
-    result = subprocess.run(["alembic", "history"], cwd=exp_dir, capture_output=True, text=True)
+    result = subprocess.run(
+        ["alembic", "history"], cwd=exp_dir, capture_output=True, text=True
+    )
     print(result.stdout)
 
-    result = subprocess.run(["alembic", "current"], cwd=exp_dir, capture_output=True, text=True)
+    result = subprocess.run(
+        ["alembic", "current"], cwd=exp_dir, capture_output=True, text=True
+    )
     current_ver = result.stdout.strip()
     print(f"当前版本: {current_ver}")
 
     # --- 先确保在 head ---
-    subprocess.run(["alembic", "upgrade", "head"], cwd=exp_dir, capture_output=True, text=True)
+    subprocess.run(
+        ["alembic", "upgrade", "head"], cwd=exp_dir, capture_output=True, text=True
+    )
 
     # --- 查看表结构（有 last_login 和 role）---
     before = subprocess.run(
         ["sqlite3", "exp1.db", "PRAGMA table_info(users);"],
         cwd=exp_dir,
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     print(f"\n--- downgrade 之前的表结构 ---\n{before.stdout.strip()}")
 
     # --- downgrade -1 ---
     print("\n>>> 执行 alembic downgrade -1")
-    subprocess.run(["alembic", "downgrade", "-1"], cwd=exp_dir, capture_output=True, text=True)
+    subprocess.run(
+        ["alembic", "downgrade", "-1"], cwd=exp_dir, capture_output=True, text=True
+    )
 
-    result = subprocess.run(["alembic", "current"], cwd=exp_dir, capture_output=True, text=True)
+    result = subprocess.run(
+        ["alembic", "current"], cwd=exp_dir, capture_output=True, text=True
+    )
     print(f"降级后版本: {result.stdout.strip()}")
 
     after = subprocess.run(
         ["sqlite3", "exp1.db", "PRAGMA table_info(users);"],
         cwd=exp_dir,
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     print(f"\n--- downgrade -1 之后的表结构 ---\n{after.stdout.strip()}")
     print("(注意 last_login 和 role 列消失了)")
 
     # --- 升级回 head ---
     print("\n>>> 执行 alembic upgrade head")
-    subprocess.run(["alembic", "upgrade", "head"], cwd=exp_dir, capture_output=True, text=True)
+    subprocess.run(
+        ["alembic", "upgrade", "head"], cwd=exp_dir, capture_output=True, text=True
+    )
 
     restored = subprocess.run(
         ["sqlite3", "exp1.db", "PRAGMA table_info(users);"],
         cwd=exp_dir,
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     print(f"\n--- upgrade back 之后的表结构 ---\n{restored.stdout.strip()}")
 
     # --- 演示 base → head 完整流程 ---
     print("\n\n>>> 演示从 base 重建所有表:")
-    subprocess.run(["alembic", "downgrade", "base"], cwd=exp_dir, capture_output=True, text=True)
+    subprocess.run(
+        ["alembic", "downgrade", "base"], cwd=exp_dir, capture_output=True, text=True
+    )
     tables_after_base = subprocess.run(
         ["sqlite3", "exp1.db", ".tables"],
         cwd=exp_dir,
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     print(f"downgrade base 后剩余表: {tables_after_base.stdout.strip()}")
 
-    subprocess.run(["alembic", "upgrade", "head"], cwd=exp_dir, capture_output=True, text=True)
+    subprocess.run(
+        ["alembic", "upgrade", "head"], cwd=exp_dir, capture_output=True, text=True
+    )
     tables_after_upgrade = subprocess.run(
         ["sqlite3", "exp1.db", ".tables"],
         cwd=exp_dir,
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     print(f"upgrade head 后剩余表: {tables_after_upgrade.stdout.strip()}")
 
@@ -441,8 +477,8 @@ def run_experiment_3():
 ----------------------------------------------------------------
 
 ❓ **问题 4-A.1**：这是第几范式？违反了哪一范式的规则？
-答：______________________________________________________
-________________________________________________________________
+答：____________违反了第二范式__2NF 应该建学生表(student_id,student_name)____student_name依赖于student_id____________________________________
+____和成绩表(course_id,grade)grade依赖于course_id为主键____________________________________________________________
 
 ----------------------------------------------------------------
 表B（order_id, customer_id, customer_name, order_date, total_amount）
@@ -451,8 +487,8 @@ ________________________________________________________________
 ----------------------------------------------------------------
 
 ❓ **问题 4-B.1**：这是第几范式？有没有优化空间？
-答：______________________________________________________
-________________________________________________________________
+答：___3NF（违反第三范式）___主键order_id是单列不存在部分依赖所以2NF满足。但customer_name通过customer_id传递依赖主键(order_id→customer_id→customer_name)，这是传递依赖违反3NF。
+________拆分为：订单表(order_id, customer_id, order_date, total_amount) + 顾客表(customer_id, customer_name)
 
 ----------------------------------------------------------------
 表C（emp_id, name, dept_id, dept_name, dept_location）
@@ -461,8 +497,8 @@ ________________________________________________________________
 ----------------------------------------------------------------
 
 ❓ **问题 4-C.1**：这是第几范式？怎么拆分？
-答：______________________________________________________
-________________________________________________________________
+答：_____3NF（违反第三范式）✅ 你的答案正确！emp_id→dept_id→dept_name/dept_location 是传递依赖。
+______________拆分：员工表(emp_id, name, dept_id) + 部门表(dept_id, dept_name, dept_location)
 
 ----------------------------------------------------------------
 表D（product_id, product_name, price）
@@ -471,7 +507,9 @@ ________________________________________________________________
 ----------------------------------------------------------------
 
 ❓ **问题 4-D.1**：这张表符合哪些范式？
-答：______________________________________________________
+答：_____ "表D 满足 1NF / 2NF / 3NF（甚至 4NF、5NF）！",
+            "最简单的理想设计：单列主键、每列原子化、无部分依赖、无传递依赖。"
+            "这种表叫 Entity Table（实体表），是规范化的典范。"_________________________________________________
 ________________________________________________________________
 """
 
@@ -483,23 +521,32 @@ def check_pandect_answers():
     print("=" * 60)
 
     answers = [
-        ("4-A", "表A 违反 2NF！",
-         "主键是 (student_id, course_id)，但 student_name 只依赖 student_id（主键的一部分），"
-         "这就是部分依赖。应拆分为两张表：学生表(student_id, student_name) + 选课成绩表(student_id, course_id, grade)。"),
-
-        ("4-B", "表B 违反 2NF！",
-         "虽然主键是单列 order_id，但 customer_name 本质上与 customer_id 绑定。"
-         "更好的设计是拆成订单表(order_id, customer_id, order_date, total_amount) + 客户表(customer_id, customer_name)，"
-         "否则修改客户名字需要更新多条订单记录（更新异常）。"),
-
-        ("4-C", "表C 违反 3NF！",
-         "存在传递依赖：emp_id → dept_id → dept_name → dept_location。"
-         "非主键列 dept_name 不直接依赖主键 emp_id，而是通过 dept_id 间接依赖。"
-         "拆分为员工表(emp_id, name, dept_id) + 部门表(dept_id, dept_name, dept_location)。"),
-
-        ("4-D", "表D 满足 1NF / 2NF / 3NF（甚至 4NF、5NF）！",
-         "最简单的理想设计：单列主键、每列原子化、无部分依赖、无传递依赖。"
-         "这种表叫 Entity Table（实体表），是规范化的典范。"),
+        (
+            "4-A",
+            "表A 违反 2NF！",
+            "主键是 (student_id, course_id)，但 student_name 只依赖 student_id（主键的一部分），"
+            "这就是部分依赖。应拆分为两张表：学生表(student_id, student_name) + 选课成绩表(student_id, course_id, grade)。",
+        ),
+        (
+            "4-B",
+            "表B 违反 2NF！",
+            "虽然主键是单列 order_id，但 customer_name 本质上与 customer_id 绑定。"
+            "更好的设计是拆成订单表(order_id, customer_id, order_date, total_amount) + 客户表(customer_id, customer_name)，"
+            "否则修改客户名字需要更新多条订单记录（更新异常）。",
+        ),
+        (
+            "4-C",
+            "表C 违反 3NF！",
+            "存在传递依赖：emp_id → dept_id → dept_name → dept_location。"
+            "非主键列 dept_name 不直接依赖主键 emp_id，而是通过 dept_id 间接依赖。"
+            "拆分为员工表(emp_id, name, dept_id) + 部门表(dept_id, dept_name, dept_location)。",
+        ),
+        (
+            "4-D",
+            "表D 满足 1NF / 2NF / 3NF（甚至 4NF、5NF）！",
+            "最简单的理想设计：单列主键、每列原子化、无部分依赖、无传递依赖。"
+            "这种表叫 Entity Table（实体表），是规范化的典范。",
+        ),
     ]
 
     for label, answer in answers:
@@ -576,11 +623,11 @@ conn.close()
 ```
 
 ❓ **问题 5.1**：加了索引后查询变快了多少倍？你的实测数据是多少？
-
+加索引后的平均查询时间: 11.78 ms 不加索引的平均查询时间: 24.34 ms 快了两倍多
 ❓ **问题 5.2**：如果我对 created_at 也建了索引，但查询条件是
          `WHERE category = ? ORDER BY created_at DESC`，
          能不能只用一个索引同时搞定过滤和排序？为什么？
-
+能 复合索引 做到边过滤边排序
 💡 **破坏性实验：**
 创建复合索引后，尝试不同的 WHERE 条件来观察是否使用索引：
 
@@ -599,7 +646,7 @@ SELECT * FROM articles WHERE created_at > '2026-06-01';
 ```
 
 思考：为什么复合索引要遵循最左前缀原则？如果不遵守会怎样？
-答：______________________________________________________
+答：___________  如果不遵守最左前缀（例如直接查 created_at），索引前半部分就无法利用，等于白建。___________________________________________
 """
 
 
@@ -617,7 +664,7 @@ def run_experiment_5():
     c = conn.cursor()
 
     # 建表
-    c.execute('''
+    c.execute("""
         CREATE TABLE articles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
@@ -625,7 +672,7 @@ def run_experiment_5():
             content TEXT,
             created_at TEXT
         )
-    ''')
+    """)
 
     # 插入 10000 条数据
     print("正在插入 10000 条测试数据...")

@@ -69,11 +69,12 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 
 ## 学习进度
 
-当前阶段：第二阶段 | 当前进度：Day 30 已完成 | LeetCode：0题 | 最后更新：2026-07-28
+当前阶段：第二阶段 | 当前进度：Day 31 已完成 | LeetCode：0题 | 最后更新：2026-07-28
 
 ### 练习完成记录
 | 日期 | Day | 完成题数 | 掌握度 | 备注 |
 |------|-----|---------|--------|------|
+| 07-28 | Day31 | 5/5 | 良好 | Alembic迁移+数据库设计：5个实验全部完成(alembic init初始化+autogenerate自动生成迁移+upgrade执行迁移/downgrade回滚/范式判断1NF-2NF-3NF/索引性能对比)。掌握Alembic完整流程(init→revision --autogenerate→upgrade head)/env.py配置(target_metadata+sys.path)/migration chain迁移链(base→001→002→head)/downgrade -1回退一步vs downgrade base全部回滚/autogenerate局限性(不能改列名改列类型需手动)/SQLite重建表机制。三大范式：1NF原子性/2NF无部分依赖(复合主键)/3NF无传递依赖。索引：B+树/最左前缀原则/EXPLAIN QUERY PLAN看执行计划(SCAN全表vs SEARCH索引)。修正：4-B答案从2NF改为3NF(单列主键无部分依赖，customer_name通过customer_id传递依赖主键=违反3NF非2NF)/4-C的3NF答案确认正确/3.1细化分情况(DROP COLUMN只丢该列数据vs DROP TABLE全没)/2.2补充SQLite重建表机制(临时表→拷贝→删旧→重命名) |
 | 07-28 | Day30 | 5/5 | 良好 | SQLAlchemy ORM基础：5个实验全部完成(模型定义User+Todo一对多关系/Session CRUD增删改查/过滤排序分页joinedload关联查询/外键约束级联删除)。掌握了ORM概念(Python对象代替SQL)/DeclarativeBase建模型/ForeignKey+relationship实现一对多/back_populates双向关联/cascade级联操作/sessionmaker会话管理/add/commit/query/filter/all/delete/diff(flush不提交vs commit持久化)/joinedload解决N+1问题。修正：3.2题desc/asc含义写反了(desc降序非升序)、1.1 cascade解释需补充delete-orphan孤儿、1.2 back_populates两边声明解释优化 |
 | 07-27 | Day29 | 5/5 | 良好 | SQL基础+SQLite：5个实验全部完成(建表INSERT/SELECT查询UPDATE DELETE/JOIN多表/聚合函数GROUP BY HAVING)。掌握了CRUD操作、防SQL注入(?占位符)、LIKE模糊匹配、分页(LIMIT/OFFSET)、INNER JOIN vs LEFT JOIN区别、聚合函数COUNT/SUM/AVG/MAX/MIN、sqlite3命令行+Python sqlite3模块。需注意：4.1题INNER/LEFT JOIN解释写反了、2.4分页测试建议跑main.py验证参考答案差异、2.1 LIMIT-OFFSET顺序描述需精简为标准写法 |
 | 07-26 | Day28 | 5/5 | 良好 | 综合项目：待办事项API。Step1(FastAPI初始化+内存存储+健康检查)/Step2(CRUD五接口：POST创建201+GET列表+GET详情404+PUT全量更新+DELETE删除204)/Step3(搜索过滤keyword/category/completed+列表切片分页+PATCH部分更新exclude_unset)/Step4(JSON文件持久化load_todos/save_todos)/Step5(Counter统计categories+tags/summary文档)。修复Bug：date.today()转str用.isoformat()/completed过滤bool无.lower()/total.size→total/size除法/response_model与分页字典冲突删List[TodoResponse]/PATCH的todo_id漏写int类型注解/stats路由被{todo_id}拦截需移到前面/load_todos()的return[]缩进错误导致首次运行返回None |
