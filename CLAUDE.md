@@ -27,7 +27,7 @@
 
 ## 交互规则
 
-当用户进入此文件夹并开始对话时，请遵循以下规则：
+当用户进入此文件夹并开始对话时，请遵循以下 rules：
 
 ### 1. 识别学习状态
 - **先读下方「学习进度」区块**，直接获取用户当前阶段、Day、已完成题数
@@ -69,11 +69,12 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 
 ## 学习进度
 
-当前阶段：第二阶段 | 当前进度：Day 32 已完成 | LeetCode：0题 | 最后更新：2026-07-29
+当前阶段：第二阶段 | 当前进度：Day 33 已完成 | LeetCode：0题 | 最后更新：2026-07-31
 
 ### 练习完成记录
 | 日期 | Day | 完成题数 | 掌握度 | 备注 |
 |------|-----|---------|--------|------|
+| 07-31 | Day33 | 5/5 | 良好 | JWT认证基础：5个实验全部完成（创建JWT令牌/jwt.encode()密钥算法/令牌验证依赖/oauth2_scheme/OAuth2PasswordRequestForm登录接口/令牌过期时间设置/Postman测试认证）。掌握：JWT结构(header.payload.signature)/HS256算法安全限制/Depends(get_current_user)权限验证依赖项/TokenData模型验证/401未授权响应。注意：login.py中需处理密码哈希（但本实验简化未实现），实际应使用passlib.hash.bcrypt；main.py的/token路由应返回access_token而非token_type（实验要求简化） |
 | 07-29 | Day32 | 5/5 | 良好 | FastAPI+SQLAlchemy集成：5个实验全部完成(依赖注入get_db+Yield/CRUD四接口POST201+GET+PUT全量更新+PATCH部分更新+DELETE204/搜索过滤+分页+分类统计+聚合查询/事务回滚rollback+flush对比/批量插入性能对比)。掌握Depends()依赖注入原理(yield+finally保证清理)/Session生命周期管理/PUT(全量替换)vsPATCH(部分更新exclude_unset=True)/func.count数据库聚合vslen内存统计/事务ACID特性(commit持久化vsflush暂存)/批量操作优化(add_all+一次commit比逐条commit快221倍)。注意：main.py中Todo模型缺少category字段导致分类统计无法测试，需补充字段或换表测试 |
 | 07-28 | Day31 | 5/5 | 良好 | Alembic迁移+数据库设计：5个实验全部完成(alembic init初始化+autogenerate自动生成迁移+upgrade执行迁移/downgrade回滚/范式判断1NF-2NF-3NF/索引性能对比)。掌握Alembic完整流程(init→revision --autogenerate→upgrade head)/env.py配置(target_metadata+sys.path)/migration chain迁移链(base→001→002→head)/downgrade -1回退一步vs downgrade base全部回滚/autogenerate局限性(不能改列名改列类型需手动)/SQLite重建表机制。三大范式：1NF原子性/2NF无部分依赖(复合主键)/3NF无传递依赖。索引：B+树/最左前缀原则/EXPLAIN QUERY PLAN看执行计划(SCAN全表vs SEARCH索引)。修正：4-B答案从2NF改为3NF(单列主键无部分依赖，customer_name通过customer_id传递依赖主键=违反3NF非2NF)/4-C的3NF答案确认正确/3.1细化分情况(DROP COLUMN只丢该列数据vs DROP TABLE全没)/2.2补充SQLite重建表机制(临时表→拷贝→删旧→重命名) |
 | 07-28 | Day30 | 5/5 | 良好 | SQLAlchemy ORM基础：5个实验全部完成(模型定义User+Todo一对多关系/Session CRUD增删改查/过滤排序分页joinedload关联查询/外键约束级联删除)。掌握了ORM概念(Python对象代替SQL)/DeclarativeBase建模型/ForeignKey+relationship实现一对多/back_populates双向关联/cascade级联操作/sessionmaker会话管理/add/commit/query/filter/all/delete/diff(flush不提交vs commit持久化)/joinedload解决N+1问题。修正：3.2题desc/asc含义写反了(desc降序非升序)、1.1 cascade解释需补充delete-orphan孤儿、1.2 back_populates两边声明解释优化 |
@@ -93,7 +94,7 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 | 06-30 | Day3 | 5/5 | 良好 | 条件判断练习全部完成，homework3-4第15行直角三角形判断有笔误，homework3-5缺少双错情况 |
 | 06-30 | Day1-3 总复习 | 全部完成 | 良好 | Day1-3所有练习已完成，之前的问题（homework1-1的f-string/bool()、homework3-4直角判断、homework3-5双错情况）均已修复 |
 | 07-01 | Day4 | 5/5 | 良好 | 循环练习全部完成，homework4-2变量名错误已修复，homework4-5素数逻辑错误已修复 |
-| 07-02 | Day5 | 5/5 | 良好 | 列表/元组/字典/集合练习全部完成，homework5-2索引赋值→append修复，homework5-5用split+循环/推导式处理输入 |
+| 07-02 | Day5 | 5/5 | 良好 | 条件判断/循环/列表/元组/字典/集合练习全部完成，homework5-2索引赋值→append修复，homework5-5用split+循环/推导式处理输入 |
 | 07-05 | Day8 | 4/4 | 良好 | 函数定义/参数/返回值练习完成（greet/add/is_even/max_of_three/咖啡订单/*args/**kwargs/analyze_numbers） |
 | 07-05 | Day7 | 5/5 | 良好 | FizzBuzz/回文判断/数字反转/石头剪刀布/学生成绩管理系统全部完成，homework7-4输入合法性检查无效（else永远不会执行，需提前拦截非法输入） |
 | 07-06 | Day9 | 3/3 | 良好 | 作用域(global)/lambda(sorted+key)/map+filter练习完成，homework9-2按成绩排序(sorted+key=lambda x:x[1])已掌握，homework9-3的filter用x if..else''而非布尔值（功能对但不规范，建议改x>0） |
@@ -111,4 +112,4 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 |------|------|------|------|
 | 第一阶段 Week2 | 命令行记账本 | ✅ 已完成 | 2026-07-11 完成，含JSON持久化+异常处理 |
 | 第一阶段 Week3 | 面向对象重构记账本 | ✅ 已完成 | 2026-07-17 完成，含Record/AccountBook类设计、JSON持久化、命令行交互 |
-| 第二阶段 Week4 | 待办事项API | ✅ 已完成 | 2026-07-26 完成，含CRUD+搜索分页+PATCH部分更新+JSON持久化+Counter统计 |
+| 第二阶段 Week4 | 待办事项API | ✅ 已完成 | 2026-07-26 完成，含CRUD+搜索分页+PATCH部分更新+JSON持久化+Counter统计
