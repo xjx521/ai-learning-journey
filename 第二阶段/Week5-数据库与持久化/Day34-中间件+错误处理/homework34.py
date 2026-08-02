@@ -43,31 +43,42 @@ def get_data():
 
 📝 **测试 1**：用浏览器或 curl 直接访问 localhost:8000/
       返回了什么？状态码是多少？
-答：______________________________________________________________
+答：__________返回200 _{"message":"Hello from API server :8000"}___________________________________________________
 
 📝 **测试 2**：从浏览器开发者工具发一个 `fetch("http://localhost:8000/data")`（模拟同域）
       需要 CORS 吗？为什么？
-答：______________________________________________________________
+答：_______不需要因为http://localhost:8000/data 协议 域名端口协议相同_______________________________________________________
 
 📝 **测试 3**：写一个 HTML 文件在 localhost:3000 上调用 fetch("http://localhost:8000/data")
       不配 CORS 时浏览器的报错是什么？
-答：______________________________________________________________
+答：___________不配 CORSAPI 的响应里就没有 `Access-Control-Allow-Origin` 头，浏览器就会拦截响应并报错：
+
+```
+Blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.___________________________________________________
 
       加上 `allow_origins=["http://localhost:3000"]` 后再试，能拿到数据吗？响应头有什么变化？
-答：______________________________________________________________
+答：__________能响应头会加上_'Access-Control-Allow-Origin___________________________________________________
 
 ❓ **问题 1.1**：为什么不能同时用 `allow_origins=["*"]` 和 `allow_credentials=True`？
-
+因为这时候就是允许任何用户在任何网页访问 非常不安全
 💡 **破坏性实验 1：**
 把 `allow_origins=["http://localhost:3000"]` 改成 `allow_origins=["*"]`
 然后保留 `allow_credentials=True` 不变，重启服务观察。
-
+启动就会报错 ValueError! Cannot allow all origins ("*") with credentials.
 💡 **破坏性实验 2：**
 把 `allow_origins=["http://localhost:3000"]` 改成 `allow_origins=["http://evil.com"]`
 然后用 `http://localhost:3000` 的页面去请求。会发生什么？
 思考：CORS 是浏览器给的最终安全保障吗？
-
+会发生未能加载页面
+ERR_CONNECTION_REFUSED (-102)
+URL: http://localhost:3000/curl/Wget 等工具不受 CORS 限制！CORS 只是浏览器的保护机制。真正的安全要靠后端接口本身做鉴权验证。
 ❓ **问题 1.2**：生产环境应该用什么方式配置允许的域名？
+绝对禁止使用 allow_origins=["*"]
+通配符会放行全网所有网站发起跨域，极易造成 CSRF、网站盗用接口、数据泄露，生产高危。
+明确白名单，只填写可信业务域名，严格最小权限。
+业务需要 Cookie、Session、登录 JWT/Token 时，必须开启allow_credentials=True，此时一定不能用*。
+区分线上域名、测试域名、内网域名，按需分组配置。
+
 """
 
 
@@ -135,11 +146,11 @@ def delete_todo(todo_id: int):
 
 | 请求 | 预期日志格式 | 实际日志 |
 |------|-------------|---------|
-| GET /todos | `[GET ] /todos              _XX_ _X.XXXs` | _________ |
-| POST /todos (title=test) | `[POST] /todos             _XX_ _X.XXXs` | _________ |
-| GET /todos/999 | `[GET ] /todos/999        _XX_ _X.XXXs` | _________ |
-| DELETE /todos/1 | `[DEL ] /todos/1          _XX_ _X.XXXs` | _________ |
-| DELETE /todos/999 | `[DEL ] /todos/999       _XX_ _X.XXXs` | _________ |
+| GET /todos | `[GET ] /todos              _XX_ _X.XXXs` | _[GET   ] /todos 200 | 0.001s________ |
+| POST /todos (title=test) | `[POST] /todos             _XX_ _X.XXXs` | _[POST  ] /todos 201 | 0.001s________ |
+| GET /todos/999 | `[GET ] /todos/999        _XX_ _X.XXXs` | _[GET   ] /todos/999  404 | 0.001s________ |
+| DELETE /todos/1 | `[DEL ] /todos/1          _XX_ _X.XXXs` | [DELETE] /todos/1  204 | 0.001s_________ |
+| DELETE /todos/999 | `[DEL ] /todos/999       _XX_ _X.XXXs` | _[DELETE] /todos/999   404 | 0.001s________ |
 
 💡 **破坏性实验：**
 把 `duration:.3f` 改成 `duration:.10f` 看看精度变化。
@@ -153,10 +164,12 @@ async def slow_endpoint():
     return {"message": "两秒后才回来"}
 ```
 然后在日志中观察这个接口的耗时是否真的是 ~2s。
-
+[GET   ] /slow        200 | 2.013s
 ❓ **问题 2.1**：响应是正着经过中间件还是反着经过中间件？为什么 duration 算在 call_next 之后？
-
+反着经过中间件 duration 在 call_next 之后算，
+      因为这段时间包含了后续所有中间件 + 路由函数的总耗时。call_next 之前只有计时开始的准备工作。
 ❓ **问题 2.2**：如果把 `call_next(request)` 注释掉，会发生什么？
+call_next请求不会到达路由层没有返回客户端 必须调用callnext才能把请求线下响应
 """
 
 
@@ -166,7 +179,7 @@ async def slow_endpoint():
 """
 目标：掌握 python-dotenv 的用法和多环境配置
 
-步骤 1：在项目根目录创建 .env 文件：
+步骤 1：：
 
 ```bash
 # .env — 开发环境配置
@@ -204,28 +217,40 @@ print(f"PORT转为整数：{PORT_INT}，类型：{type(PORT_INT)}")
 ```
 
 📝 **测试 3.1**：运行 main.py，观察输出结果是否正确加载了 .env 中的值。
-答：______________________________________________________________
+答：_____应用名称：Todo API
+调试模式：true
+数据库：sqlite:///./dev_todos.db
+端口号：8080
+CORS来源：http://localhost:3000,http://localhost:8080
+应用名称：Todo API
+调试模式：true
+数据库：sqlite:///./dev_todos.db
+端口号：8080
+CORS来源：http://localhost:3000,http://localhost:8080__________
+_____________________正确输出__________________________
 
 📝 **测试 3.2**：把 .env 中的 DEBUG=true 改成 DEBUG=false，再运行。
-答：______________________________________________________________
+答：____________DEBUG转为布尔值变成False__________________________________________________
 
 📝 **测试 3.3**：删除 .env 文件（或重命名），再运行。os.getenv 返回什么？
-答：______________________________________________________________
+答：_____________所有没有默认值的都返回None_________________________________________________
 
 📝 **测试 3.4**：在 .env 中加入一行空格值 `SPACES_TEST="hello world"`，读取它。
-答：______________________________________________________________
+答：________________新增空格值：hello world______________________________________________
 
 ❓ **问题 3.1**：load_dotenv() 为什么要放在代码最前面？
-
+读取同目录下的env文件
 ❓ **问题 3.2**：为什么 .env 文件要加到 .gitignore？如果被别人看到了会有什么后果？
-
+技术人员会获得相关环境变量对程序进行攻击防止密钥、密码泄露。SECRET_KEY 泄露 = 攻击者可伪造 JWT Token。
+      数据库密码泄露可直接连接数据库删库。所以绝对不要提交 .env 到 Git。
 💡 **破坏性实验 1：**
 在 .env 中设置 DATABASE_URL=sqlite:///../../etc/passwd
 观察会不会真的读取这个路径的文件？
-
+会在该路径下创建文件并读取验证了路径注入风险——生产环境必须校验路径。
 💡 **破坏性实验 2：**
 把 `load_dotenv()` 的参数改成 `load_dotenv(".env.nonexistent")`（一个不存在的文件）。
 程序会报错吗？
+不会或有兜底机制使用默认值静默处理
 """
 
 
@@ -342,17 +367,75 @@ def create_item(item: ItemCreate):
 
 | 请求 | 期望的状态码 | 期望的 body | 实际结果 |
 |------|------------|------------|---------|
-| GET /items | 200 | `{"success":true,"data":[...]}` | _________ |
-| GET /items/999 | 404 | `{"success":false,"error":{"code":404,...}}` | _________ |
-| DELETE /items/999 | 404 | `{"success":false,"error":{"code":404,...}}` | _________ |
-| POST /items `{}` | 422 | `{"success":false,"error":{"code":422,...,"details":[...]}}` | _________ |
-| POST /items `{"name":"","price":-1}` | 422 | `{"success":false,"error":{"code":422,...},"details":[{"field":"name","msg":"..."},{"field":"price","msg":"..."}]}` | _________ |
-| POST /items `{"name":"香蕉","price":3.5}` | 201 | `{"success":true,"data":{"id":2,"name":"香蕉","price":3.5},...}` | _________ |
+| GET /items | 200 | `{"success":true,"data":[...]}` | _{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "苹果",
+      "price": 5.5
+    }
+  ],
+  "message": "ok"
+}________ |
+| GET /items/999 | 404 | `{"success":false,"error":{"code":404,...}}` | _{
+  "success": false,
+  "error": {
+    "code": 404,
+    "message": "商品不存在",
+    "path": "/items/999"
+  }
+}________ |
+| DELETE /items/999 | 404 | `{"success":false,"error":{"code":404,...}}` | __{
+  "success": false,
+  "error": {
+    "code": 404,
+    "message": "商品不存在",
+    "path": "/items/999"
+  }
+}_______ |
+| POST /items `{}` | 422 | `{"success":false,"error":{"code":422,...,"details":[...]}}` | _{
+  "success": false,
+  "error": {
+    "code": 422,
+    "message": "请求数据格式不正确",
+    "details": [
+      {
+        "field": "body.name",
+        "message": "Field required"
+      }
+    ],
+    "path": "/items"
+  }________ |
+| POST /items `{"name":"","price":-1}` | 422 | `{"success":false,"error":{"code":422,...},"details":[{"field":"name","msg":"..."},{"field":"price","msg":"..."}]}` | _{
+  "success": false,
+  "error": {
+    "code": 422,
+    "message": "请求数据格式不正确",
+    "details": [
+      {
+        "field": "body.name",
+        "message": "String should have at least 1 character"
+      }
+    ],
+    "path": "/items"
+  }
+}________ |
+| POST /items `{"name":"香蕉","price":3.5}` | 201 | `{"success":true,"data":{"id":2,"name":"香蕉","price":3.5},...}` | _{
+  "success": true,
+  "data": {
+    "id": 2,
+    "name": "香蕉",
+    "price": 3.5
+  },
+  "message": "创建成功"
+}________ |
 
 ❓ **问题 4.1**：三个异常处理器谁的优先级最高？谁兜底？
-
+HTTPException优先级最高 参数验证第二  Exception兜底
 ❓ **问题 4.2**：error_response 里为什么要带上 path 字段？
-
+方便定位出错接口path 帮助定位具体出错的接口，便于排查和前端提示。
+      当多个接口共用同一个错误处理逻辑时，path 能帮助区分是 /items/999 还是 /users/1 报的错。
 💡 **破坏性实验 1：**
 故意触发一个未被捕获的异常（比如除以零）：
 ```python
@@ -362,7 +445,15 @@ def crash():
     return {"result": x}
 ```
 收到了什么？符合你预期的统一格式吗？
-
+{
+  "success": false,
+  "error": {
+    "code": 500,
+    "message": "服务器内部错误",
+    "path": "/crash"
+  }
+}
+符合预期格式
 💡 **破坏性实验 2：**
 在异常处理器中故意制造错误（引用未定义的变量）：
 ```python
@@ -371,9 +462,11 @@ async def broken_handler(request: Request, exc: Exception):
     return JSONResponse(status_code=500, content=undefined_variable_here)
 ```
 会发生什么？FastAPI 是怎么处理的？
-
+抛出 NameError，但没有被其他 handler 捕获的话，FastAPI 会检测并重试一次，
+      最终返回一个简单的 500 页面。说明异常处理器自身也要健壮。
 思考：这种统一格式对前端团队有什么好处？
-答：______________________________________________________________
+答：________端好处：只需要写一套错误处理逻辑——检查 res.success === false 就能知道出错了，
+      然后通过 error.code/error.message 展示给用户。不用分别处理 404/422/500 等不同框架的错误格式。______________________________________________________
 """
 
 
