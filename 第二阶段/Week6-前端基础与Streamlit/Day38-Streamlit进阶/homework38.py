@@ -25,11 +25,11 @@ import streamlit as st  # 已导入
 💡 提示：侧边栏用 st.sidebar.组件；分栏 st.columns(2)；标签页 st.tabs；折叠 st.expander。
 
 # 侧边栏
-st.____("控制面板")                      # 【填空 1】侧边栏标题
-mode = st.____("模式", ["简洁", "完整"])  # 【填空 2】侧边栏下拉框
+st._sidebar.title___("控制面板")                      # 【填空 1】侧边栏标题
+mode = st._sidebar.selectbox___("模式", ["简洁", "完整"])  # 【填空 2】侧边栏下拉框
 
 # 分栏
-col1, col2 = st.____(2)                  # 【填空 3】分成两列
+col1, col2 = st._columns___(2)                  # 【填空 3】分成两列
 with col1:
     st.write("左列")
     a = st.button("左按钮")
@@ -38,20 +38,20 @@ with col2:
     b = st.button("右按钮")
 
 # 标签页
-tab1, tab2 = st.____(["介绍", "详情"])   # 【填空 4】两个标签页
+tab1, tab2 = st._tabs___(["介绍", "详情"])   # 【填空 4】两个标签页
 with tab1:
     st.write("这是介绍")
 with tab2:
     st.write("这是详情")
 
 # 折叠面板
-with st.____("点击展开更多帮助"):        # 【填空 5】折叠面板
+with st.__expander__("点击展开更多帮助"):        # 【填空 5】折叠面板
     st.write("藏起来的内容")
 """
-st.____("控制面板")                      # 填空 1
-mode = st.____("模式", ["简洁", "完整"])  # 填空 2
+st._sidebar.title___("控制面板")  # 填空 1
+mode = st._sidebar.selectbox___("模式", ["简洁", "完整"])  # 填空 2
 
-col1, col2 = st.____(2)                  # 填空 3
+col1, col2 = st.__columns__(2)  # 填空 3
 with col1:
     st.write("左列")
     a = st.button("左按钮")
@@ -59,21 +59,21 @@ with col2:
     st.write("右列")
     b = st.button("右按钮")
 
-tab1, tab2 = st.____(["介绍", "详情"])   # 填空 4
+tab1, tab2 = st.__tabs__(["介绍", "详情"])  # 填空 4
 with tab1:
     st.write("这是介绍")
 with tab2:
     st.write("这是详情")
 
-with st.____("点击展开更多帮助"):        # 填空 5
+with st._expander___("点击展开更多帮助"):  # 填空 5
     st.write("藏起来的内容")
 
 # 📝 测试 1.1：st.columns(2) 返回什么？为什么用 with 语句？
-# 答：返回____，用 with 是因为把组件____进这个容器里。
+# 答：返回_容器___，用 with 是因为把组件_col1放___进这个容器里。
 # 💡 提示：返回两个"容器对象"；with 是"放进去"。
 
 # ❓ 问题 1.2：st.columns([1, 3]) 和 st.columns(2) 有什么区别？
-# 答：________________________________________________________
+# 答：__st.columns([1, 3])是两个columns对象 第一个对象占据位宽度1份 第二个占3份 __st.columns(2)代表两个容器对象默认两个占据的宽度平分____________________________________________________
 
 
 # ============================================================
@@ -84,18 +84,18 @@ with st.____("点击展开更多帮助"):        # 填空 5
 
 💡 提示：with st.form("名字") 包起来；提交按钮必须用 st.form_submit_button。
 
-with st.____("登录表单"):               # 【填空 6】表单容器
-    username = st.____("用户名")        # 【填空 7】文本框
-    password = st.____("密码", type="password")  # 【填空 8】密码框
-    submit = st.____("登录")            # 【填空 9】表单提交按钮
+with st.__form__("登录表单"):               # 【填空 6】表单容器
+    username = st.__text_input__("用户名")        # 【填空 7】文本框
+    password = st.__text_input__("密码", type="password")  # 【填空 8】密码框
+    submit = st._form_submit_button___("登录")            # 【填空 9】表单提交按钮
 """
-with st.____("登录表单"):               # 填空 6
-    username = st.____("用户名")        # 填空 7
-    password = st.____("密码", type="password")  # 填空 8
-    submit = st.____("登录")            # 填空 9
+with st._form___("登录表单"):  # 填空 6
+    username = st._text_input___("用户名")  # 填空 7
+    password = st._text_input___("密码", type="password")  # 填空 8
+    submit = st.__form_submit_button__("登录")  # 填空 9
 
 # 📝 测试 2.1：表单内用 st.button 可以吗？为什么？
-# 答：____，因为表单内必须用______才能触发提交。
+# 答：_不可以___，因为表单内必须用__表单提交按钮____才能触发提交。
 # 💡 提示：st.button 会单独触发重跑，破坏"一起提交"。
 
 # ❓ 问题 2.2：submit 的值是什么类型？什么时候为 True？
@@ -111,24 +111,24 @@ with st.____("登录表单"):               # 填空 6
 
 💡 提示：st.file_uploader(标签, type=[...])；判断 uploaded is not None；用 .getvalue() 读内容。
 
-uploaded = st.____("上传一个文本文件", type=["txt", "csv"])  # 【填空 10】文件上传
-if uploaded is not ____:              # 【填空 11】没上传时是 None，要判断
-    st.write(f"文件名：{uploaded.____}")      # 【填空 12】文件名属性
-    content = uploaded.____().decode("utf-8")  # 【填空 13】读字节内容
+uploaded = st._file_uploader___("上传一个文本文件", type=["txt", "csv"])  # 【填空 10】文件上传
+if uploaded is not _None___:              # 【填空 11】没上传时是 None，要判断
+    st.write(f"文件名：{uploaded.__name__}")      # 【填空 12】文件名属性
+    content = uploaded._getvalue___().decode("utf-8")  # 【填空 13】读字节内容
     st.text(content)
 """
-uploaded = st.____("上传一个文本文件", type=["txt", "csv"])  # 填空 10
-if uploaded is not ____:              # 填空 11
-    st.write(f"文件名：{uploaded.____}")      # 填空 12
-    content = uploaded.____().decode("utf-8")  # 填空 13
+uploaded = st._file_uploader___("上传一个文本文件", type=["txt", "csv"])  # 填空 10
+if uploaded is not __None__:  # 填空 11
+    st.write(f"文件名：{uploaded._name___}")  # 填空 12
+    content = uploaded.__getvalue__().decode("utf-8")  # 填空 13
     st.text(content)
 
 # 📝 测试 3.1：没上传文件时，uploaded 的值是什么？为什么代码要判断它？
-# 答：值是____，因为不判断直接访问会____。
+# 答：值是_None___，因为不判断直接访问会__报错__。
 # 💡 提示：返回 None（不是一个对象）。
 
 # ❓ 问题 3.2：type=["txt","csv"] 的作用是什么？
-# 答：________________________________________________________
+# 答：___________声明上传文件的类型是txt,csv_____________________________________________
 
 
 # ============================================================
@@ -141,31 +141,33 @@ if uploaded is not ____:              # 填空 11
 
 import pandas as pd
 data = pd.DataFrame({"月份": [1,2,3,4], "销量": [10, 20, 15, 30]})
-st.____(data)      # 【填空 14】折线图
-st.____(data)      # 【填空 15】柱状图
+st._line_chart___(data)      # 【填空 14】折线图
+st._bar_chart___(data)      # 【填空 15】柱状图
 
 import matplotlib.pyplot as plt
 fig, ax = plt.subplots()
 ax.plot(data["月份"], data["销量"])
 ax.set_title("销量趋势")
-st.____(fig)       # 【填空 16】把 matplotlib 图显示出来
+st.__pyplot__(fig)       # 【填空 16】把 matplotlib 图显示出来
 """
 import pandas as pd
-data = pd.DataFrame({"月份": [1,2,3,4], "销量": [10, 20, 15, 30]})
-st.____(data)      # 填空 14
-st.____(data)      # 填空 15
+
+data = pd.DataFrame({"月份": [1, 2, 3, 4], "销量": [10, 20, 15, 30]})
+st._line_chart___(data)  # 填空 14
+st._bar_chart___(data)  # 填空 15
 
 import matplotlib.pyplot as plt
+
 fig, ax = plt.subplots()
 ax.plot(data["月份"], data["销量"])
 ax.set_title("销量趋势")
-st.____(fig)       # 填空 16
+st._pyplot___(fig)  # 填空 16
 
 # 📝 测试 4.1：st.line_chart 和 st.bar_chart 的区别是什么？
-# 答：________________________________________________________
+# 答：______line_chart是折线图 bar_chart是柱状图__________________________________________________
 
 # ❓ 问题 4.2（选做）：st.pyplot 和 st.plotly_chart 有什么区别？
-# 答：________________________________________________________
+# 答：_________st.pyplot是静态图只能下载等____st.plotly_chart可交互可悬停缩放___________________________________________
 # 💡 提示：一个静态图，一个可交互（悬停/缩放）。
 
 
@@ -190,13 +192,13 @@ st.write(f"普通变量计数：{count}")
 # 💡 提示：先初始化 if "count" not in st.session_state: st.session_state.count = 0
 #         再在按钮里用 st.session_state.count 累加。
 
-if "count" not in st.____:            # 【填空 17】判断键是否存在
-    st.____.count = 0                 # 【填空 18】初始化
+if "count" not in st._session_state.count___:  # 【填空 17】判断键是否存在
+    st._session_state___.count = 0  # 【填空 18】初始化
 
-if st.____("加一（session_state）"):   # 【填空 19】按钮
-    st.____.count += 1                # 【填空 20】累加
+if st._button___("加一（session_state）"):  # 【填空 19】按钮
+    st.__session_state__.count += 1  # 【填空 20】累加
 
-st.write(f"session_state 计数：{st.____.count}")  # 【填空 21】读取
+st.write(f"session_state 计数：{st._session_state___.count}")  # 【填空 21】读取
 """
 # 提示：上面实验5的留白，用：
 
@@ -209,11 +211,11 @@ if st.button("加一（session_state）"):
 st.write(f"session_state 计数：{st.session_state.count}")
 """
 # 📝 测试 5.2：改成 session_state 后，点多次按钮，计数会持续累加吗？
-# 答：会/不会。因为初始化只在____时执行。
+# 答：会。因为初始化只在_第一次不存在___时执行。
 # 💡 提示：if "count" not in ... 只在第一次为 True。
 
 # ❓ 问题 5.3：session_state 最适合解决 AI 应用的什么问题？
-# 答：________________________________________________________
+# 答：_____对话上下文，用户的选择，程序保持的状态___________________________________________________
 # 💡 提示：想想多轮对话、记住用户点过什么。
 
 
@@ -225,36 +227,37 @@ st.write(f"session_state 计数：{st.session_state.count}")
 
 💡 提示：用 st.session_state.history 存列表；初始化；提交时 append；循环展示。
 
-if "history" not in st.____:           # 【填空 22】初始化列表
-    st.____.history = []
+if "history" not in st._session_state___:           # 【填空 22】初始化列表
+    st._session_state___.history = []
 
-prompt = st.____("输入你的问题：")      # 【填空 23】文本框
-if st.____("提交"):                    # 【填空 24】按钮
-    st.____.history.append(prompt)     # 【填空 25】记住本次提问
-    st.____("已保存")                  # 【填空 26】成功提示
+prompt = st.__text_input__("输入你的问题：")      # 【填空 23】文本框
+if st._button___("提交"):                    # 【填空 24】按钮
+    st._session_state___.history.append(prompt)     # 【填空 25】记住本次提问
+    st.__success__("已保存")                  # 【填空 26】成功提示
 
 st.write("历史记录：")
-for h in st.____.history:              # 【填空 27】遍历历史
+for h in st._session_state___.history:              # 【填空 27】遍历历史
     st.write(f"- {h}")
 """
-if "history" not in st.____:           # 填空 22
+if "history" not in st._session_state___:  # 填空 22
     st.____.history = []
 
-prompt = st.____("输入你的问题：")      # 填空 23
-if st.____("提交"):                    # 填空 24
-    st.____.history.append(prompt)     # 填空 25
-    st.____("已保存")                  # 填空 26
+prompt = st._text_input___("输入你的问题：")  # 填空 23
+if st.__button__("提交"):  # 填空 24
+    st._session_state___.history.append(prompt)  # 填空 25
+    st.__success__("已保存")  # 填空 26
 
 st.write("历史记录：")
-for h in st.____.history:              # 填空 27
+for h in st._session_state___.history:  # 填空 27
     st.write(f"- {h}")
 
+# 写在ask.py
 # 📝 测试 6.1：提交几次后，历史记录会累积吗？刷新页面后还在吗？
-# 答：提交几次会____；刷新页面后____（因为刷新会开新会话）。
+# 答：提交几次会_累积___；刷新页面后_不存在 会开新的会话___（因为刷新会开新会话）。
 # 💡 提示：session_state 是"会话内"保持，刷新页面会重置。
 
 # ❓ 问题 6.2：这个"提问记录"能力，稍作改造就能变成什么 AI 应用？
-# 答：________________________________________________________
+# 答：___________多轮对话/聊天记录/问答AI_____________________________________________
 # 💡 提示：多轮对话/聊天记录。
 
 

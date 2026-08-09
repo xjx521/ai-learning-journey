@@ -69,11 +69,12 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 
 ## 学习进度
 
-当前阶段：第二阶段 | 当前进度：Day 37 已完成 | LeetCode：0题 | 最后更新：2026-08-09
+当前阶段：第二阶段 | 当前进度：Day 38 已完成 | LeetCode：0题 | 最后更新：2026-08-09
 
 ### 练习完成记录
 | 日期 | Day | 完成题数 | 掌握度 | 备注 |
 |------|-----|---------|--------|------|
+| 08-09 | Day38 | 6/6 | 良好 | Streamlit进阶：6个实验全部完成(布局/表单/文件上传/图表/会话状态/提问记录综合)。文件：app.py(可运行版含6个标签页)+homework38.py(填空)+study.py(各组件完整演示)+ask.py(实验6提问历史+侧边栏显示全部checkbox)。掌握：布局(sidebar/columns分栏含宽度比例[1,3]/tabs/expander/container)、st.form多个输入一起提交(必须用form_submit_button，st.button会破坏机制)、文件上传(file_uploader+is not None判断+getvalue().decode读取)、图表(line_chart/bar_chart/area_chart/pyplot静态图/plotly_chart交互图)、session_state跨交互记忆(核心：脚本每次重跑普通变量会丢，初始化if键not in+按钮内累加，刷新页面开新会话会重置)、提问历史综合实验(改造成多轮对话雏形)。验证：venv导入matplotlib 3.11.1+plotly 6.9.0+pandas 3.0.5成功。这两天一致的小问题：homework38.py填空答案沿用下划线占位格式(如st._sidebar.title___)，文件本身不运行，可运行版是app.py/study.py |
 | 08-09 | Day37 | 6/6 | 良好 | Streamlit入门：6个实验全部完成(文本与标题/文本输入交互/滑块下拉复选框/反馈消息/展示数据表格JSON/结合FastAPI调后端)。文件：app.py(可运行版)+homework37.py(填空)+study.py+service.py(极简FastAPI前端挑战)。掌握：Streamlit用纯Python写网页、每次交互脚本从首行重跑一遍的运行原理、常用控件(st.text_input/slider/selectbox/checkbox)、st.dataframe可交互(排序滚动)vs st.table静态、反馈消息success/warning/error颜色、用requests调FastAPI后端(核心雏形)。验证：venv导入streamlit 1.61.1+fastapi 0.139.2成功。备注：homework37.py填空答案把方法名写在了下划线占位里(如st._text_input___)，文件本身不运行，可运行版是app.py，建议后续清理占位符 |
 | 08-09 | Day36 | 6/6 | 良好 | HTML/CSS速览+前端框架概念：6个实验全部完成(为什么懂前端/前端三大件/看懂HTML结构/CSS化妆/前端框架概念/前后端配合)。实操：practice36.html+test.html。掌握：前端三大件(HTML骨架=内容是啥/CSS皮肤=长啥样/JS肌肉=能干嘛)、HTML标签结构(head给浏览器看/body给用户看/h1~h6字大小/a超链接href/img图片src/src不存在显示破图)、CSS写法(选中谁→设啥→设成啥)、class加点.选中、三种写法(内联/内部/外部)、前端框架(React/Vue)解决"数据变界面自动更新"、Streamlit就是迷你前端框架(用Python自动生成HTML/CSS/JS)、前后端通过HTTP+JSON通信。目标定位：AI应用开发者懂前端不必精通 |
 | 08-02 | Day35 | 综合项目 | 良好 | 综合项目：Todo API 用户系统。给 Day28 的待办 API 加上完整用户系统：新增 User 表+Todo 关联 user_id(每个待办属于一个用户)。核心功能：POST /auth/register 注册/bcrypt密码哈希(passlib CryptContext schemes=["bcrypt"])/POST /auth/login 登录+JWT签发(HS256+ACCESS_TOKEN_EXPIRE_MINUTES=30)/OAuth2PasswordBearer+get_current_user鉴权依赖/全部操作需带Token/权限控制(只能改删自己的待办)/CORS中间件(ALLOWED_ORIGINS从.env读)/环境变量(DATABASE_URL/SECRET_KEY/DEBUG)。14个路由：/auth/register+login、/todos/me(我的待办)、/todos CRUD、/todos/stats/summary/{user_id}统计。测试数据insert_test_data.py插入2用户(test 8条+xjx 6条=12条)。验证：venv导入成功，数据库users表2个用户+todos表12条。备注：解决Day33遗留问题——密码哈希用passlib实现了 |
