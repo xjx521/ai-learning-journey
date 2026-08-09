@@ -69,11 +69,13 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 
 ## 学习进度
 
-当前阶段：第二阶段 | 当前进度：Day 35 已完成 | LeetCode：0题 | 最后更新：2026-08-02
+当前阶段：第二阶段 | 当前进度：Day 37 已完成 | LeetCode：0题 | 最后更新：2026-08-09
 
 ### 练习完成记录
 | 日期 | Day | 完成题数 | 掌握度 | 备注 |
 |------|-----|---------|--------|------|
+| 08-09 | Day37 | 6/6 | 良好 | Streamlit入门：6个实验全部完成(文本与标题/文本输入交互/滑块下拉复选框/反馈消息/展示数据表格JSON/结合FastAPI调后端)。文件：app.py(可运行版)+homework37.py(填空)+study.py+service.py(极简FastAPI前端挑战)。掌握：Streamlit用纯Python写网页、每次交互脚本从首行重跑一遍的运行原理、常用控件(st.text_input/slider/selectbox/checkbox)、st.dataframe可交互(排序滚动)vs st.table静态、反馈消息success/warning/error颜色、用requests调FastAPI后端(核心雏形)。验证：venv导入streamlit 1.61.1+fastapi 0.139.2成功。备注：homework37.py填空答案把方法名写在了下划线占位里(如st._text_input___)，文件本身不运行，可运行版是app.py，建议后续清理占位符 |
+| 08-09 | Day36 | 6/6 | 良好 | HTML/CSS速览+前端框架概念：6个实验全部完成(为什么懂前端/前端三大件/看懂HTML结构/CSS化妆/前端框架概念/前后端配合)。实操：practice36.html+test.html。掌握：前端三大件(HTML骨架=内容是啥/CSS皮肤=长啥样/JS肌肉=能干嘛)、HTML标签结构(head给浏览器看/body给用户看/h1~h6字大小/a超链接href/img图片src/src不存在显示破图)、CSS写法(选中谁→设啥→设成啥)、class加点.选中、三种写法(内联/内部/外部)、前端框架(React/Vue)解决"数据变界面自动更新"、Streamlit就是迷你前端框架(用Python自动生成HTML/CSS/JS)、前后端通过HTTP+JSON通信。目标定位：AI应用开发者懂前端不必精通 |
 | 08-02 | Day35 | 综合项目 | 良好 | 综合项目：Todo API 用户系统。给 Day28 的待办 API 加上完整用户系统：新增 User 表+Todo 关联 user_id(每个待办属于一个用户)。核心功能：POST /auth/register 注册/bcrypt密码哈希(passlib CryptContext schemes=["bcrypt"])/POST /auth/login 登录+JWT签发(HS256+ACCESS_TOKEN_EXPIRE_MINUTES=30)/OAuth2PasswordBearer+get_current_user鉴权依赖/全部操作需带Token/权限控制(只能改删自己的待办)/CORS中间件(ALLOWED_ORIGINS从.env读)/环境变量(DATABASE_URL/SECRET_KEY/DEBUG)。14个路由：/auth/register+login、/todos/me(我的待办)、/todos CRUD、/todos/stats/summary/{user_id}统计。测试数据insert_test_data.py插入2用户(test 8条+xjx 6条=12条)。验证：venv导入成功，数据库users表2个用户+todos表12条。备注：解决Day33遗留问题——密码哈希用passlib实现了 |
 | 08-02 | Day34 | 4/4 | 良好 | 中间件+错误处理+环境变量：4个实验全部完成(CORS中间件/自定义日志中间件+性能监控BaseHTTPMiddleware/环境变量加载python-dotenv+配置/统一错误响应格式RequestValidationError全局异常处理)。掌握：中间件执行流程(Request→Middleware→路由→Response→Middleware)、add_middleware注册顺序后加先执行、CORS跨域原理(同源协议域名端口)、Access-Control-Allow-Origin响应头、严格vs宽松CORS配置(宽松domain+allow_credentials=True会报错)、日志中间件dispatch(call_next)记录耗时、认证中间件白名单绕过、全局异常处理器(validates错误422/HTTPException 4xx/未捕获异常500)统一响应格式(前端只检查res.success===false)、环境变量管理(为什么要用.env/.gitignore、python-dotenv加载、os.getenv默认值、DEBUG字符串转bool、多环境配置.env.development/.env.production)。16个路由验证通过。学习笔记.md系统整理六大部分 |
 | 07-31 | Day33 | 5/5 | 良好 | JWT认证基础：5个实验全部完成（创建JWT令牌/jwt.encode()密钥算法/令牌验证依赖/oauth2_scheme/OAuth2PasswordRequestForm登录接口/令牌过期时间设置/Postman测试认证）。掌握：JWT结构(header.payload.signature)/HS256算法安全限制/Depends(get_current_user)权限验证依赖项/TokenData模型验证/401未授权响应。注意：login.py中需处理密码哈希（但本实验简化未实现），实际应使用passlib.hash.bcrypt；main.py的/token路由应返回access_token而非token_type（实验要求简化） |
