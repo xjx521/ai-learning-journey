@@ -182,6 +182,7 @@ async def add_book(
     book_obj = Book(**book.__dict__)
     db.add(book_obj)
     await db.commit()
+    await db.refresh(book_obj)
     return book
 
 

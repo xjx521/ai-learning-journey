@@ -1,0 +1,7 @@
+streamlit
+fastapi
+requests
+sqlalchemy
+uvicorn
+python-dotenv
+aiomysql

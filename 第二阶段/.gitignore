@@ -1,0 +1,20 @@
+# 环境变量文件（含密码/密钥，绝不能提交）
+.env
+.env.*
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# 虚拟环境
+.venv/
+venv/
+
+# 数据库文件
+*.db
+*.sqlite3
+
+# IDE / 系统
+.idea/
+.vscode/
+.DS_Store
