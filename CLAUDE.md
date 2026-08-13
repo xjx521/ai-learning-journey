@@ -56,6 +56,7 @@
   3. **自动提交代码到 GitHub**：`git add .` → `git commit` → `git push`
 - 如果发现用户在某个难点卡住太久（超过 2 天），建议调整策略
 - 定期提醒用户写笔记、刷 LeetCode
+- 用户说"完成 Day X"时，除上面的 git 提交外，还要：把当天知识补进 `第三~第五阶段加速学习/学习笔记.md`。模板：大白话 / 工程·面试视角 / ❌易错 / 面试常考附参考答案；风格=通俗易懂（不玄学论文风也不过分简单）+ 企业工程落地视角；示例代码按需（概念为主）；每个知识点下方 2-3 道面试常考题+参考答案。commit message 注明"学习笔记更新"
 
 ### 5. 技术栈（按学习顺序）
 Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千问/OpenAI/GLM）→ Ollama → ChromaDB → LangChain → LangGraph → Docker → Git
@@ -117,6 +118,7 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 - `AI应用开发学习路线.docx` 底部已追加「附录五」= 20 天详细计划（原计划保留）
 - `第三~第五阶段加速学习/学习指南.md` —— 阶段学习法
 - `第三~第五阶段加速学习/概念地图.md` —— 概念清单，每天填
+- `第三~第五阶段加速学习/学习笔记.md` —— 面试复习笔记，每天完成后由助手按模板补充（通俗易懂+工程视角+每题附参考答案）
 - `第三~第五阶段加速学习/DayXX-主题/实验任务单.md` —— 每天任务单
 
 **吴恩达课程（概念预习）**：
