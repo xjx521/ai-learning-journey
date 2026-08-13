@@ -69,7 +69,7 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 
 ## 学习进度
 
-当前阶段：第三阶段（加速计划） | 当前进度：Day 44 开始（8/13） | LeetCode：0题 | 最后更新：2026-08-13
+当前阶段：第三阶段（加速计划） | 当前进度：Day 45 开始（8/13） | LeetCode：0题 | 最后更新：2026-08-13
 
 ### 第三~第五阶段加速学习（2026-08-12 起，8/31 开学前执行）
 > 这是**当前主执行的计划**，覆盖原计划第 3-5 阶段的时间表。原计划保留在 docx 附录五，不删改。
@@ -181,6 +181,7 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 ### 练习完成记录
 | 日期 | Day | 完成题数 | 掌握度 | 备注 |
 |------|-----|---------|--------|------|
+| 08-13 | Day44 | 实验A/B/C+自测5关 | 良好 | 多轮流式对话：实验A多轮(第1轮"我叫小明"→第2轮带历史答出"你叫小明"；破坏性对照不带历史→"我不知道你的名字"→实证模型无记忆)、实验B流式(stream=True逐chunk打印，遇delta.content=None空块打印一堆None→学会if delta.content is not None过滤；观察首chunk只带role)、实验C system+成本(带system客服口吻vs不带；每轮打印messages长度观察递增)。自测5关全答：能讲/能写/能修(记住role空格坑，去messages检查)/能答why(stateless与网页记忆不矛盾=每次重发历史)/能扛边界(交接文档摘要+截断最旧+RAG三种方案，已懂RAG雏形)。预习概念全对。文件：chat_multi/chat_stream/chat_system.py。⚠️待补：学习笔记《多轮流式》未建 |
 | 08-13 | Day43 | 实验A/B/C+自测 | 良好 | LLM基础概念：实验A token认识(tokenizer数句子,中文1字≈1-2token,8192窗口约800轮)、实验B首次调API★(原定通义千问,遇401 invalid_api_key=Key重复sk-前缀已修复→400 Arrearage=阿里云欠费,改切DeepSeek:openai库+base_url=api.deepseek.com/v1+model=deepseek-v4-flash(注意deepseek-chat/reasoner已于2026-07-24停用)+DEEPSEEK_API_KEY存.env,调通打印自我介绍;学会读报错→官方文档链接)、实验C temperature破坏性实验(T=0 vs 1.5各5次冷笑话:0稳定重复同梗/1.5每轮不同更放飞,验证T>1概率分布拉平)。自测能答why完成(抽取事实用低T=准确优先)。文件:call_deepseek.py+experiment_c.py。⚠️待补:今日产出①学习笔记《LLM三大概念》未建 |
 | 08-12 | Day42 | 阶段复习 | 良好 | 阶段复习：整理第二阶段全部内容为7个结构化笔记文件(Day22-41)。文件夹：Day42-阶段复习笔记/。①01-HTTP与API基础(Day22-25：HTTP协议/RESTful设计/异步编程)②02-FastAPI核心(Day26-28：入门/进阶/待办API项目，含Day28六个bug修复模块)③03-数据库与ORM【核心，以day30-create异步为准】(Day29-32：SQL基础/SQLAlchemy异步ORM三件套+CRUD全await/Alembic迁移/FastAPI集成，含同步vs异步对比表)④04-认证安全与中间件(Day33-35：JWT三段式/OAuth2PasswordBearer+RequestForm/bcrypt/中间件洋葱模型/CORS/全局异常处理/环境变量/Todo用户系统权限隔离)⑤05-前端Streamlit与全栈(Day36-40：HTML/CSS速览/Streamlit入门进阶/session_state/AI应用开发模板全栈四文件结构)⑥06-Docker容器化(Day41：镜像vs容器/Dockerfile套路/端口映射/0.0.0.0/compose/host.docker.internal)⑦07-总结速查(三层次知识总表/个人错题本38条/面试高频考点/速查表/LeetCode 50题清单去重)。每知识点统一模板：知识点说明+最简示例(中文注释)+使用场景+易错点(❌/✅)+对比表格；每章末尾面试/开发高频考点(必问/加分/冷门)；错误代码均有【错误原因+修复方案】模块。LeetCode清单：第一阶段20题(Day1-20映射)+第二阶段30题(Week4栈队列10/Week5双指针哈希10/Week6滑动窗口链表10)，与原推荐重复的1/20/66/217已替换，50题无重复全部Easy。校验：代码围栏全部配对、错题本齐全、50题无重复题号 |
 | 08-12 | Day41 | 5/5 | 良好 | Docker基础：5个实验全部完成(镜像vs容器概念/Dockerfile填空/build+run+ps命令/docker-compose/实战容器化FastAPI)。文件：homework41.md(填空+实战记录全完成)+Dockerfile+main.py(容器化的异步SQLAlchemy+MySQL应用)+学习笔记.md。掌握：①镜像=模板/安装包只读，容器=镜像跑起来的实例可启停删(类比模具和披萨)，一个镜像能跑多个互不影响的容器 ②Docker只装应用+依赖比VM(完整系统)轻、启动快 ③Dockerfile套路：FROM→WORKDIR→COPY requirements→RUN install→COPY代码→EXPOSE→CMD ④EXPOSE只是声明端口，真正打通靠docker run -p(左本机端口右容器端口) ⑤CMD里--host 0.0.0.0才能让容器外访问(127.0.0.1只允许容器内部) ⑥核心命令docker build -t名字 . 构建镜像/docker run -p 8000:8000运行/-d后台/docker ps查看/docker logs日志/docker stop停止 ⑦docker-compose.yml：services下每个缩进两层是服务，可写build或image+ports+environment+volumes+depends_on，up -d启动/down停止 ⑧容器里连宿主机MySQL的localhost是容器自己，要用host.docker.internal指回电脑(写进Day39-40项目的Dockerfile)。验证：docker build+run真实跑通，homework41记录Uvicorn running+访问localhost:8000/docs返回200 OK。注意：Day41的requirements.txt里误写了"docker练习"几个字(不是真实依赖)，重新docker build会在pip install失败，需补成fastapi/uvicorn/sqlalchemy/aiomysql |
