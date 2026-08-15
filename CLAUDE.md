@@ -71,7 +71,7 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 
 ## 学习进度
 
-当前阶段：第三阶段（加速计划） | 当前进度：Day 46 开始（8/14） | LeetCode：0题 | 最后更新：2026-08-14
+当前阶段：第三阶段（加速计划） | 当前进度：Day 47 开始（8/15） | LeetCode：0题 | 最后更新：2026-08-15
 
 ### 第三~第五阶段加速学习（2026-08-12 起，8/31 开学前执行）
 > 这是**当前主执行的计划**，覆盖原计划第 3-5 阶段的时间表。原计划保留在 docx 附录五，不删改。
@@ -189,6 +189,7 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 ### 练习完成记录
 | 日期 | Day | 完成题数 | 掌握度 | 备注 |
 |------|-----|---------|--------|------|
+| 08-15 | Day46 | 实验A/B/C+自测5关 | 良好 | Prompt工程(提示词工程)：实验A模糊vs明确(同问"推荐手机"：模糊版模型自己编钛金属机身/A17 Pro卖点，字数风格全失控；明确版"我是电商文案设计师+为iPhone15Pro写推荐语+必须包含续航卖点+不要提价格+90字以内一句话"输出贴合要求，实证四要素角色+任务+约束+格式=把概率往目标方向压，模型没变变的是文字)、实验B 0-shot vs 2-shot情感判断(0-shot输出一大段解释；2-shot先给『客服联系不上』→负面『物流超快』→正面示例，再问同一条→只回"负面"一个词，实证few-shot最大价值是锁格式不是教知识，利用In-Context Learning上下文学习、不改模型权重)、实验C结构化输出三法(①纯自然语言"输出成JSON"→json.loads报错JSONDecodeError输出带```json围栏+空白；②few-shot先给标准JSON示例→解析成功；③response_format={"type":"json_object"}→解析成功；⚠️踩坑：DeepSeek用json_object时提示词必须出现"json"字样否则报错)。自测5关全答：能讲(引导非命令，模型是概率续写统计机器)、能写(编程培训班招生文案四要素)、能修(JSON带围栏清洗：system给完整示例+response_format+try-except三层)、能答why(few-shot利用In-Context Learning自回归预测，prompt告诉任务、few-shot告诉以什么格式输出)、能扛边界(提示注入三层防御：提示词约束缓解+代码层关键词过滤硬防线+输出校验/系统提示隔离，不能彻底防住；system放末尾防覆盖是偏方不可靠)。文件：expA_prompt_clear_vs_vague.py+expB_fewshot_0vs2_emo.py+expC_json_output_three_method.py。学习笔记《Prompt 工程》已补入+概念地图回填8行(Prompt五技巧+Token/温度/messages/流式/多轮等Day43-44遗留⬜)。⚠️待补：任务单"五、自评"两问(最吃力哪一关/为什么说模型没变变的是文字)仍空着——Day45遗留问题再现，提醒用户下次补 |
 | 08-14 | Day45 | 实验A/B/C+自测5关 | 良好 | Function Calling函数调用：实验A给模型配add计算器(tools参数JSON Schema四层结构type/function/name/description/parameters；问"3加5等于几"模型不直接答8，返回tool_calls：content=null，name=add，arguments="{\"a\":3,\"b\":5}"——注意arguments是JSON字符串需json.loads转字典)、实验B完整闭环(四段式：user→assistant(tool_calls)→tool→assistant最终答案；亲测踩坑：把带tool_calls的assistant消息换成"好的"→400报错"Messages with role 'tool' must be a response to a preceding message with 'tool_calls'"，悟出tool_call_id=订单号配对，assistant消息必须原样append回传)、实验C天气vs幻觉对照(有工具"北京今天天气晴朗气温28℃"基于真dict；注释tools无工具→模型承认无法实时获取，实证FC防幻觉)。自测5关全答：能讲(三段式)、能写(tools参数)、能修(忽略tool_calls→content为None程序收不了尾，用if msg.tool_calls判断)、能答why(模型=大脑只发意图，程序=手脚执行)、能扛边界(try-except+Prompt约束+工具白名单name not in valid_tools三层防御)。文件：tool_add.py+tool_wather.py(wather笔误无害)。⚠️待补：自评第一问"最吃力哪一关"空着；能修解释原稿略含糊(已在讨论中澄清订单号原理) |
 | 08-13 | Day44 | 实验A/B/C+自测5关 | 良好 | 多轮流式对话：实验A多轮(第1轮"我叫小明"→第2轮带历史答出"你叫小明"；破坏性对照不带历史→"我不知道你的名字"→实证模型无记忆)、实验B流式(stream=True逐chunk打印，遇delta.content=None空块打印一堆None→学会if delta.content is not None过滤；观察首chunk只带role)、实验C system+成本(带system客服口吻vs不带；每轮打印messages长度观察递增)。自测5关全答：能讲/能写/能修(记住role空格坑，去messages检查)/能答why(stateless与网页记忆不矛盾=每次重发历史)/能扛边界(交接文档摘要+截断最旧+RAG三种方案，已懂RAG雏形)。预习概念全对。文件：chat_multi/chat_stream/chat_system.py。学习笔记《多轮流式对话》已补入 |
 | 08-13 | Day43 | 实验A/B/C+自测 | 良好 | LLM基础概念：实验A token认识(tokenizer数句子,中文1字≈1-2token,8192窗口约800轮)、实验B首次调API★(原定通义千问,遇401 invalid_api_key=Key重复sk-前缀已修复→400 Arrearage=阿里云欠费,改切DeepSeek:openai库+base_url=api.deepseek.com/v1+model=deepseek-v4-flash(注意deepseek-chat/reasoner已于2026-07-24停用)+DEEPSEEK_API_KEY存.env,调通打印自我介绍;学会读报错→官方文档链接)、实验C temperature破坏性实验(T=0 vs 1.5各5次冷笑话:0稳定重复同梗/1.5每轮不同更放飞,验证T>1概率分布拉平)。自测能答why完成(抽取事实用低T=准确优先)。文件:call_deepseek.py+experiment_c.py。学习笔记《LLM基础概念》已补入 |
