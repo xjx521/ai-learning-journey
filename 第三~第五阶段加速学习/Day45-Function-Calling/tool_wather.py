@@ -19,7 +19,9 @@ def send_messages(messages):
         messages=messages,
         tools=tools,
     )
-    return response.choices[0].message
+    return response.choices[
+        0
+    ].message  # `response.choices` 是模型备选回答列表，`[0]` 取第一条结果；`.message` 代表模型本轮消息对象。
 
 
 def get_weather(city):
