@@ -71,7 +71,7 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 
 ## 学习进度
 
-当前阶段：第三阶段（加速计划） | 当前进度：Day 49 复习日（8/20） | LeetCode：0题 | 最后更新：2026-08-20
+当前阶段：第四阶段（加速计划） | 当前进度：Day 50 RAG 原理与最小管线（8/21） | LeetCode：0题 | 最后更新：2026-08-21
 
 ### 第三~第五阶段加速学习（2026-08-12 起，8/31 开学前执行）
 > 这是**当前主执行的计划**，覆盖原计划第 3-5 阶段的时间表。原计划保留在 docx 附录五，不删改。
@@ -172,7 +172,60 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 | 20 | Web UI LLMs 的日常使用 | 了解 |
 | 21-23 | 工作任务分析 / 新工作流 | 了解 |
 | 24-30 | 团队构建 / 自动化 / 担忧 / AGI / 负责任AI / 总结 | 了解（面试/求职可用） |
-- RAG 课：https://www.snm0516.aisee.tv/video/BV1QRbnzTEyK/（Phase 4 用，届时再发）
+
+**RAG 课完整目录（BV1QRbnzTEyK，2026-08-20 记录）**：
+> 生成任务单时**直接用集号（P几）**告诉用户看哪一集，不用按标题找。共 5 个模块 49 集。⚠️ 列表里**没有 P12**（原目录空缺，不是漏记）。
+
+| 集号 | 主题 | 用途 |
+|------|------|------|
+| P1 | 与吴恩达的对话 | 可跳过 |
+| P2 | 单元1 简介 | - |
+| P3 | 检索增强生成技术导论 | Day50 RAG 原理 |
+| P4 | RAG 的实际应用 | Day50 |
+| P5 | RAG 架构概览 | Day50 |
+| P6 | 大语言模型导论 | Day50（回顾 Day43） |
+| P7 | 信息检索技术导论 | Day50 检索本质 |
+| P8 | 单元1 总结 | - |
+| P9 | 单元2 简介 | - |
+| P10 | 检索器架构综述 | Day50/51 检索器 |
+| P11 | 元数据过滤技术 | Day52 metadata |
+| P13 | 关键词搜索：BM25算法 | Day50 手写检索对照 |
+| P14 | 语义搜索：技术入门 | Day51 Embedding |
+| P15 | 语义搜索：嵌入模型深度解析 | Day51 |
+| P16 | 混合搜索策略 | Day53 混合检索 |
+| P17 | 检索质量评估 | Day54 评估 |
+| P18 | 单元2 总结 | - |
+| P19 | 近似最近邻(ANN)算法 | Day52 ChromaDB 原理 |
+| P20 | 向量数据库技术 | Day52 |
+| P21 | 文本分块技术 | Day52 分块 |
+| P22 | 高级分块方法论 | Day52 |
+| P23 | 查询语句解析 | Day53 |
+| P24 | 交叉编码器与ColBERT模型 | Day53 重排序 |
+| P25 | 检索结果重排序技术 | Day53 |
+| P26 | 模块3 总结 | - |
+| P27 | 模块4 简介 | - |
+| P28 | Transformer架构解析 | Day43 回顾 |
+| P29 | LLM采样策略 | Day43 回顾 |
+| P30 | 大语言模型选择方法论 | 了解 |
+| P31 | 提示词工程：增强指令构建 | Day46 回顾 |
+| P32 | 高级提示词工程技术 | 了解 |
+| P33 | 幻觉处理机制 | Day55 防幻觉 |
+| P34 | 大模型性能评估 | Day54 评估 |
+| P35 | 自主式RAG系统 | Phase5 Agent 相关 |
+| P36 | RAG和微调技术比较 | 面试常考 |
+| P37 | 模块4 总结 | - |
+| P38 | 模块5 简介 | - |
+| P39 | 生产部署的挑战 | 9月企业级 |
+| P40 | RAG评估策略实施 | Day54 |
+| P41 | 日志监控与可观测性 | 9月 |
+| P42 | 定制化评估体系 | Day54 |
+| P43 | 模型量化技术 | 了解 |
+| P44 | 成本与响应质量的平衡 | 了解 |
+| P45 | 时延与响应质量的权衡 | 了解 |
+| P46 | 安全防护机制 | Day55 防注入 |
+| P47 | 多模态RAG系统 | 了解 |
+| P48 | 模块5 总结 | - |
+- RAG 课：https://www.snm0516.aisee.tv/video/BV1QRbnzTEyK/（Phase 4 用，目录见上表）
 - Agent 课：AI Agents in LangGraph（Phase 5 用，届时再发）
 - 课程用 OpenAI 技术栈，我们项目用通义千问，代码不照搬，只取概念
 
@@ -182,13 +235,16 @@ Python → FastAPI → Streamlit → SQLite/SQLAlchemy → LLM API（通义千�
 | 阶段 | 日期 | Day | 内容 |
 |------|------|-----|------|
 | Phase 3 | 8/12-8/18 | 43-49 | LLM 概念 + API + 流式/多轮 + Function Calling + Prompt |
-| Phase 4 | 8/19-8/26 | 50-57 | RAG 概念 + 手写管线 + ChromaDB + 检索/评估 + LangChain 映射 |
-| Phase 5 | 8/27-8/31 | 58-62 | Agent 概念 + 手写 ReAct + 真实工具 + LangGraph |
-| 9 月收尾 | 开学后 | - | 双项目企业级：评估体系/Docker/README/架构图/博客 |
+| Phase 4 | 8/21-8/28 | 50-57 | RAG 概念 + 手写管线 + ChromaDB + 检索/评估 + LangChain 映射 |
+| Phase 5 | 8/29-9/2 | 58-62 | Agent 概念 + 手写 ReAct + 真实工具 + LangGraph |
+| 9 月收尾 | 9/3 起（开学后） | - | 双项目企业级：评估体系/Docker/README/架构图/博客 |
+
+> ⚠️ 2026-08-20 决定：**按原计划节奏执行**（概念深度 > 项目完成度，压缩计划会砍能写/能扛边界关）。Phase 3 实际 8/13-8/20 完成（比原定 8/12-8/18 晚 2 天），故 Phase 4/5 日期整体顺延 2 天，Phase 5 尾端 8/31-9/2 滑进开学（每天 4-5h，该段为动手型 LangGraph/项目工作，可扛）。概念地图 ⬜→✅ 仍为"概念学透"唯一验收标准。
 
 ### 练习完成记录
 | 日期 | Day | 完成题数 | 掌握度 | 备注 |
 |------|-----|---------|--------|------|
+| 08-21 | Day49 | 复习日（5关自查+面试自测+代码复现） | 良好 | Phase 3 阶段复习日（8/20 任务单，8/21 补完）：①概念地图 17 行过 5 关自查 ②读「面试冲刺 10 考点」（Transformer/QKV、预训练/SFT/RLHF、解码策略、KV Cache、Prompt Caching、RAGvs微调vs长上下文、模型评估、模型选型、Embedding、Agent）③实验B 面试自测 10 题：**4 题卡壳**——FC 三段式空着没答、QKV 只答三字母说不出流程、预训练/SFT/RLHF 只写到"预训练解决的是"、KV Cache 空着、降成本只写 1 条；RAG/微调/长上下文选型、temperature/top_p、无状态多轮 答得好④实验C 代码复现三骨架 vs backend/main.py 对照标错：manage_history 的 `len>5` 判断写反（应 `<=5` 保底停）、count_tokens 少 s+缺 await；remember_activity 字典名 session_activity/acticity/avtivity 三个版本混用+MAX_SESSIONS typo+execute/scalars typo+缺 commit；get_llm_answer 顺序反（先重建 history 再判断 system）+system_prompt 写成 dict+`session-id` 减号=语法错+参数名 `message=` 错（应 `messages=`）+append 缺花括号+response.choice 缺 s⑤产出「我不会清单」（三张表：概念卡点 5 / 面试题卡点 5 / 代码卡点 5；Top3=FC 三段式 / 预训练SFT RLHF / KV Cache+QKV）。自测 5 关：能讲(一条消息从前端到落库的旅程：前端传 session_id+提问→后端刷新会话→判断淘汰→判断 system→manage_history→调 LLM→再 manage_history→落库)、能写(LRU 三件套+先刷新当前会话避免删自己)、能修(500 看后端控制台/InvalidApiKey 查 .env)、能答 why(长对话成本涨得快=每次重发全部历史当输入 token)、能扛边界(10 用户并发用 AsyncOpenAI 不阻塞)。✅自评：最吃力**还是"能写"**；新增考点最没底 **QKV/Prompt Caching/KV Cache**。⚠️遗留：①成本打印（Day48 遗留）仍未做 ②我不会清单复习打卡记录待填。下一步 Day50 RAG 原理与最小管线 |
 | 08-20 | Day48 | 实验A/B/C+会话淘汰+自测5关 | 良好 | 第一个AI项目（把mock换真DeepSeek）：实验A换真LLM(AsyncOpenAI+base_url换厂商，前端一行不改；悟出"换模型=只改一个函数")、实验B多轮记忆落库(按session_id从chatmessages表重建history→system首轮加一次→调LLM→user+assistant写回库；role写反bug已修)、会话淘汰(LRU：session_last_active字典+MAX_SESSIONS=10，先刷新当前会话避免删自己→min()找最老→删DB行+删字典键→commit)、前端session_id修复★(核心bug：前端没传session_id→后端默认"default"→所有对话挤一个会话→淘汰永不触发；改法：uuid生成session_id存st.session_state+提交时带上+「新对话」按钮换新uuid，已验证记忆隔离)。自测5关全答：能讲(前端美化传参/后端一个函数封装模型调用)、能写(手写带历史get_llm_answer伪代码)、能修(500看后端控制台日志/InvalidApiKey查.env重复制)、能答why(同步阻塞=async路由里调同步OpenAI→10用户排队卡死，解决用AsyncOpenAI)、能扛边界(50轮→窗口爆token涨幻觉，LRU过期清理+数据库管持久)。文件：backend/main.py+frontend/app.py。✅自评已填：最吃力历史管理(要新增会话表+增删查+过期清理存数据库)；用自己话解释前后端分离=前端一行不动只传参数，后端把固定回答改成LLM即可，代价是计划变更时前后端数据库都要跟着改。⚠️实验C成本打印未做(main.py里没打印每轮token/成本，任务单填了对比表但代码没加) |
 | 08-16 | Day47 | 实验A/B/C+自测5关 | 良好 | Token与上下文窗口管理：实验A近似数token(count_tokens函数用正则统计中文×1.5+英文×1.3+符号×1加权求和，英文短句15.8/中文短句21.0/代码24.1/标点emoji9.0——中文比英文同视觉长度更费token、代码最费，启发给用户显示"剩余额度"要分语种不同换算；⚠️GBK控制台打印emoji行报UnicodeEncodeError是环境编码问题非逻辑错)、实验B max_tokens截断(设max_tokens=10故意掐断→finish_reason从stop变length，实证"一句话说一半"的检测方法：程序打印response.choices[0].finish_reason==length就提示用户回答被截断/调高max_tokens重试；四个finish_reason全记：stop正常/length截断/tool_calls发工具调用/content_filter安全拦截)、实验C上下文窗口管理+成本估算★(count_messages_tokens拼所有content算总token；manage_history超limit就del messages[1:3]从最前删且保底留system+最近2轮=5条；模拟20轮 319.5→601.5→845.5tokens，20轮超800limit删到剩13轮；成本估算=输入单价×总输入+输出单价×总输出，3次快照0.0003/0.0006/0.0008元)。自测5关全答：能讲(两个视角：给用户看=对久远内容失忆；给程序看=账单翻倍+要删最旧历史)、能写(手写count_tokens+manage_history最小版)、能修(没报错但话只说一半→打印finish_reason字段，length=max_tokens截断)、能答why(长对话成本涨得快=每次请求都把全部历史重发一遍当输入token计费；不是不能删最老user而是要user+assistant成对删，否则因果断裂引发幻觉)、能扛边界(10万字超窗口：只靠提示词不能兜底，要代码层条件判断count_tokens>limit就break不发请求+提示词告知用户分段输入)。文件：expA_token_estimate.py+expB_truncate_test.py+expC_context_manage.py。学习笔记《Token与上下文窗口》已补入。✅自评已填：最吃力实验C代码(好久没写python+正则生疏)、用自己话解释"把历史全塞回messages"的代价(模型无记忆需重发历史→后期输入token暴涨成本涨+幻觉性能下降)。这是Phase 3最后一个核心概念，明天Day48做第一个AI项目 |
 | 08-15 | Day46 | 实验A/B/C+自测5关 | 良好 | Prompt工程(提示词工程)：实验A模糊vs明确(同问"推荐手机"：模糊版模型自己编钛金属机身/A17 Pro卖点，字数风格全失控；明确版"我是电商文案设计师+为iPhone15Pro写推荐语+必须包含续航卖点+不要提价格+90字以内一句话"输出贴合要求，实证四要素角色+任务+约束+格式=把概率往目标方向压，模型没变变的是文字)、实验B 0-shot vs 2-shot情感判断(0-shot输出一大段解释；2-shot先给『客服联系不上』→负面『物流超快』→正面示例，再问同一条→只回"负面"一个词，实证few-shot最大价值是锁格式不是教知识，利用In-Context Learning上下文学习、不改模型权重)、实验C结构化输出三法(①纯自然语言"输出成JSON"→json.loads报错JSONDecodeError输出带```json围栏+空白；②few-shot先给标准JSON示例→解析成功；③response_format={"type":"json_object"}→解析成功；⚠️踩坑：DeepSeek用json_object时提示词必须出现"json"字样否则报错)。自测5关全答：能讲(引导非命令，模型是概率续写统计机器)、能写(编程培训班招生文案四要素)、能修(JSON带围栏清洗：system给完整示例+response_format+try-except三层)、能答why(few-shot利用In-Context Learning自回归预测，prompt告诉任务、few-shot告诉以什么格式输出)、能扛边界(提示注入三层防御：提示词约束缓解+代码层关键词过滤硬防线+输出校验/系统提示隔离，不能彻底防住；system放末尾防覆盖是偏方不可靠)。文件：expA_prompt_clear_vs_vague.py+expB_fewshot_0vs2_emo.py+expC_json_output_three_method.py。学习笔记《Prompt 工程》已补入+概念地图回填8行(Prompt五技巧+Token/温度/messages/流式/多轮等Day43-44遗留⬜)。✅自评已补(08-16回填)：最吃力能答why+能扛边界+json.loads代码部分(查了豆包)；用自己话解释"模型没变变的是文字"=大模型能力没变，变的是提示词，提示词越清楚规范模型越能按引导预测token完成任务 |
