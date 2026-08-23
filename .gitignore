@@ -28,3 +28,6 @@ Thumbs.db
 # SQLite 数据库文件（运行时生成，可再通过脚本重建）
 *.db
 *.sqlite3
+
+# ChromaDB 向量库数据（运行时生成，脚本可重建，不入库）
+**/chroma_data*/
