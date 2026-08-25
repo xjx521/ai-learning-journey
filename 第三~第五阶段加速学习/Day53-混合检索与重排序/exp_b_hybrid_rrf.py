@@ -1,0 +1,140 @@
+# 实验 B：混合检索——BM25 和语义检索互补
+
+import chromadb
+from chromadb import Documents, EmbeddingFunction, Embeddings
+from openai import OpenAI
+from math import log
+from collections import Counter
+
+
+class OllamaEmbeddingFunction(EmbeddingFunction[Documents]):
+    def __init__(self):
+        self._client = OpenAI(base_url="http://127.0.0.1:11434/v1", api_key="ollama")
+
+    def __call__(self, input: Documents) -> Embeddings:
+        resp = self._client.embeddings.create(model="bge-m3", input=list(input))
+        return [r.embedding for r in resp.data]
+
+
+def tokenize(text):
+    return list(text)
+
+
+def bm25_score(query, doc_tf, doc_len, avgdl, idf, k1=1.5, b=0.75):
+    score = 0.0
+    for token in tokenize(query):
+        if token not in idf:
+            continue
+        tf = doc_tf.get(token, 0)
+        if tf == 0:
+            continue
+        denom = tf + k1 * (1 - b + b * doc_len / avgdl)
+        score += (idf[token] * (tf * (k1 + 1))) / denom
+    return score
+
+
+def bm25_retrieve(query, docs, doc_tfs, avgdl, idf, top_k=1):
+    scored = []
+    for index, doc in enumerate(docs):
+        score = bm25_score(
+            query=query, doc_tf=doc_tfs[index], doc_len=len(doc), avgdl=avgdl, idf=idf
+        )
+        scored.append((score, doc))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return scored[:top_k]
+
+
+def rrf_score(rank_in_bm25, rank_in_vector):
+    """
+    RRF倒数排名融合
+    rank_in_bm25: 当前文档在BM25结果里的名次，从1开始（第1名=1，第2名=2）
+    rank_in_vector: 当前文档在向量检索结果里的名次，从1开始
+    """
+    score = 1 / (60 + rank_in_bm25) + 1 / (60 + rank_in_vector)
+    return score
+
+
+code_docs = [
+    "薪酬发放：每月15号发放上个月的薪水，遇节假日提前到最近的工作日。",
+    "年假政策：入职满一年有5天年假，满三年10天，满五年15天。",
+    "报销规则：出差住宿标准每晚500元，餐饮每天100元，超标部分自理。",
+    "晋升规则：每年两次晋升窗口，需要主管推荐和答辩评审。",
+    "打卡制度：每天早晚各打卡一次，迟到超过30分钟记一次警告。",
+    "团建聚餐：每月最后一周有团建活动，公司报销聚餐和场地费用。",
+    "报销单编号规则：外勤报销单编号以R开头（如R-2024-0015），差旅报销单以T开头，月结报销单以M开头。",
+    "服务器机房命名规范：生产环境服务器以PROD开头（如PROD-DB-01），测试环境以TEST开头。",
+]
+
+# ---- 1. 每篇文档的词频 TF（token 在文档里出现几次）----
+doc_tfs = [Counter(tokenize(doc)) for doc in code_docs]
+#  doc_tfs 是一个 list，里面有 8 个元素，每个元素是一个 Counter 对象（不是数字）。Counter 就是"字典"的亲戚，长得一样：
+# doc_tfs[0] = {'薪': 2, '酬': 1, '发': 2, '放': 2, '月': 2, '的': 2, ...}
+
+# ---- 2. 逆文档频率 IDF（这个 token 在几篇文档里出现过？越少越值钱）----
+N = len(code_docs)
+doc_freq = {}
+for tf in doc_tfs:  # 第1层：先拿出第1篇的Counter，再第2篇的Counter……
+    for token in tf:  # 第2层：在这个Counter里遍历它有哪些"字"
+        doc_freq[token] = doc_freq.get(token, 0) + 1
+idf = {
+    t: log(1 + (N - df + 0.5) / (df + 0.5)) for t, df in doc_freq.items()
+}  ## 每个字"记一笔"，跨文档累加
+# **IDF 逆文档频率**
+# 关键点：for token in tf 遍历的是 Counter 的键（字）
+# - df：该 token 出现在多少篇文档
+# - 一个词出现在越少文档 (df 越小)，IDF 计算出来数值越大，代表这个词更珍贵，命中之后加分更高。
+# > 加 0.5 是平滑，防止分母为 0（查询出现完全没见过的字符）
+
+avgdl = (
+    sum(len(d) for d in code_docs) / N
+)  # 所有文档的平均字符长度，BM25 用来做**长文档惩罚**
+
+client = chromadb.PersistentClient(path="./chroma_data")
+
+col = client.get_or_create_collection(
+    name="hr_hybrid", embedding_function=OllamaEmbeddingFunction()
+)
+col.upsert(
+    ids=["d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8"], documents=code_docs
+)  # upsert保证幂等判断不存在才添加
+
+for q in [
+    "我入职两年有几天年假？",
+    "工资什么时候发？ ",
+    "最近累，想出去放松两天 ",
+    "团建花钱公司报销吗？ ",
+    "R-2024-0015 是什么类型的报销单？",
+]:
+    print(f"测试问题：{q}")
+
+    # 第一步：BM25 侧，给每篇文档编号。 你已经写好了 bm25_retrieve，它返回的是按分降序排好的列表。用 enumerate把"第几名"抽出来存成字典：
+    bm25_result = bm25_retrieve(
+        query=q, docs=code_docs, doc_tfs=doc_tfs, avgdl=avgdl, idf=idf, top_k=8
+    )
+    rank_in_bm25 = {
+        doc: i + 1 for i, (score, doc) in enumerate(bm25_result)
+    }  # （这里 i+1 就是名次，第一名 = 1。因为 top_k=8 = 全部 8 篇，所以 8 篇文档全在字典里。）
+
+    # 第二步：ChromaDB 侧，同样编一份号。
+    vector_result = col.query(query_texts=[q], n_results=8)
+    vec_doc = vector_result["documents"][0]  # 纯文档字符串list
+    rank_in_vector = {doc: i + 1 for i, doc in enumerate(vec_doc)}
+
+    # 第三步：融合。对 8 篇文档循环，每篇算 rrf_score(rank_in_bm25[doc], rank_in_vector[doc])，存成 (融合分, doc)的列表，排序取第一名。
+    hybrid = []
+    for doc in code_docs:
+        rrf = rrf_score(rank_in_bm25[doc], rank_in_vector[doc])
+        hybrid.append((rrf, doc))
+
+    hybrid.sort(key=lambda x: x[0], reverse=True)
+    # 输出对比
+    print(f"纯BM25 top1：{bm25_result[0][1]}")
+    print(f"纯向量top1：{vec_doc[0]}")
+    print(f"RRF混合top1：{hybrid[0][1]}")
+
+#  生产里的四种幂等解法，从推荐到兜底：
+
+#   1. upsert 代替 add（最标准）：ChromaDB 的 col.upsert(ids=..., documents=...)——id 存在就更新，不存在才新增。天然幂等。
+#   2. 用内容 hash 当 id：id 不是随便取的，而是 hash(文档内容)。同内容→同 id→upsert 覆盖，自动去重。
+#   3. delete + recreate：重跑前 delete_collection 清空再 add。简单粗暴，小库够用。
+#   4. 按版本建 collection：hr_hybrid_v1、v2，新版本建新的，旧的保留。适合要回溯历史的场景。
