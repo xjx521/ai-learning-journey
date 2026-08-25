@@ -31,3 +31,6 @@ Thumbs.db
 
 # ChromaDB 向量库数据（运行时生成，脚本可重建，不入库）
 **/chroma_data*/
+
+# workbuddy 工具内存数据（非学习内容，不入库）
+.workbuddy/
