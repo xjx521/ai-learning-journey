@@ -27,16 +27,18 @@ agent = create_agent(
 并告知我你的思考过程，工具的调用原因，按思考、行动、观察三个结构告知我""",
 )
 
+# res=agent.invoke({"messages": [{"role": "user", "content": "算算我的BMI值是多少"}]})
+# print(res)
 # 流式输出
 for chunk in agent.stream(
     {"messages": [{"role": "user", "content": "算算我的BMI值是多少"}]},
     stream_mode="values",
 ):
-    latest_message = chunk["messages"][-1]
-    if latest_message.content:
-        print(type(latest_message).__name__, latest_message.content)
+    latest_messages = chunk["messages"][-1]
+    if latest_messages.content:
+        print(type(latest_messages).__name__, latest_messages.content)
     try:
-        if latest_message.tool_calls:
-            print(f"工具调： {[tc["name"] for tc in latest_message.tool_calls]}")
+        if latest_messages.tool_calls:
+            print(f"工具调： {[tc["name"] for tc in latest_messages.tool_calls]}")
     except AttributeError as e:
         pass

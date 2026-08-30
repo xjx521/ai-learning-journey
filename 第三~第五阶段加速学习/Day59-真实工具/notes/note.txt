@@ -1,0 +1,1 @@
+1. Thought→Action→Observation 循环2. 工具返回要模型看得懂3. 失败包装成 Observation 不抛异常
